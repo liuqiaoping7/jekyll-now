@@ -26,4 +26,6 @@ A cross compiler is necessary to compile code for multiple platforms from one de
 通常是给二次开发的项目工程师看的。通常以评估板卡来展示外围接口扩展、以示例软件来展示实际业务能力。见 http://www.ti.com/product/TMS320DM8148/toolssoftware 链接至 http://www.ti.com/tool/linuxezsdk-davinci 。
 以下我们将以项目工程师的角色进行实际业务二次开发。
 
-3、二次开发示例
+3、交叉编译环境构建
+
+4、二次开发
