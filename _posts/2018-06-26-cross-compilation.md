@@ -16,11 +16,14 @@ Examples of properties of typical embedded computers when compared with general-
 >A cross compiler is a compiler capable of creating executable code for a platform other than the one on which the compiler is running. For example, a compiler that runs on a Windows 7 PC but generates code that runs on Android smartphone is a cross compiler. A cross compiler is necessary to compile code for multiple platforms from one development host. Direct compilation on the target platform might be infeasible, for example on a microcontroller of an embedded system, because those systems contain no operating system. In paravirtualization, one computer runs multiple operating systems and a cross compiler could generate an executable for each of them from one main source.
 
 #  2、获取资料 #
-通常芯片公司推出一款芯片都会给出说明特性、开发套件。见 http://www.ti.com/product/TMS320DM8148/ 。
-说明特性
-通常是给二次开发的项目负责人看的。项目负责人的职能是面对具体的问题或者需求找到合适的解决方案，而说明特性就是告诉他们如果你碰到了以下领域的问题或者以下指标需求，请选择我。见 http://www.ti.com/product/TMS320DM8148/description#descriptions 。
-开发套件
-通常是给二次开发的项目工程师看的。通常以评估板卡来展示外围接口扩展、以示例软件来展示实际业务能力。见 http://www.ti.com/product/TMS320DM8148/toolssoftware 链接至 http://www.ti.com/tool/linuxezsdk-davinci 。
+通常芯片公司推出一款芯片都会给出说明特性、开发套件。  
+见 http://www.ti.com/product/TMS320DM8148/ 。
++   说明特性  
+通常是给二次开发的项目负责人看的。项目负责人的职能是面对具体的问题或者需求找到合适的解决方案，而说明特性就是告诉他们如果你碰到了以下领域的问题或者以下指标需求，请选择我。  
+见 http://www.ti.com/product/TMS320DM8148/description#descriptions 。
++   开发套件  
+通常是给二次开发的项目工程师看的。通常以评估板卡来展示外围接口扩展、以示例软件来展示实际业务能力。  
+见 http://www.ti.com/product/TMS320DM8148/toolssoftware。  
 以下我们将以项目工程师的角色进行实际业务二次开发。
 
 #  3、环境搭建 #
