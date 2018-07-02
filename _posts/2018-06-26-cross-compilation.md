@@ -11,7 +11,7 @@ title: Embedded system & Cross Compilation
 
 >Examples of properties of typical embedded computers when compared with general-purpose counterparts are low power consumption, small size, rugged operating ranges, and low per-unit cost. This comes at the price of limited processing resources, which make them significantly more difficult to program and to interact with. However, by building intelligence mechanisms on top of the hardware, taking advantage of possible existing sensors and the existence of a network of embedded units, one can both optimally manage available resources at the unit and network levels as well as provide augmented functions, well beyond those available.For example, intelligent techniques can be designed to manage power >consumption of >embedded systems.
 
-# #  1.2、交叉编译
+# #    1.2、交叉编译
 这是维基百科词条，说明了交叉编译的定义、存在的意义：
 >A cross compiler is a compiler capable of creating executable code for a platform other than the one on which the compiler is running. For example, a compiler that runs on a Windows 7 PC but generates code that runs on Android smartphone is a cross compiler. A cross compiler is necessary to compile code for multiple platforms from one development host. Direct compilation on the target platform might be infeasible, for example on a microcontroller of an embedded system, because those systems contain no operating system. In paravirtualization, one computer runs >multiple operating systems and a cross compiler could generate an executable for each of them from one main source.
 
@@ -25,7 +25,7 @@ title: Embedded system & Cross Compilation
 
 #  3、环境搭建
 
-# #  3.1 设置环境变量包含交叉编译工具链路径:
+# #    3.1 设置环境变量包含交叉编译工具链路径:
     ruisu@ruisu:~/share$ sudo vi /etc/bash.bashrc
     在文件末尾添加:
     export PATH=$PATH:/home/ruisu/share/dvrrdk-rs8148/ti_tools/cgt_a8/arago/linux-devkit/bin
@@ -35,7 +35,7 @@ title: Embedded system & Cross Compilation
     ruisu@ruisu:~/share/dvrrdk-rs8148/dvr_rdk$ sudo apt-get install ia32-libs
     再编译应该就没有问题了。
 
-# #  3.2 配置tftp服务
+# #    3.2 配置tftp服务
     安装tftp：
     ruisu@ruisu:~/share$ sudo apt-get install tftp-hpa tftpd-hpa xinetd
     这里tftpd为服务端tftp为客户端(可以用于测试服务端是否成功)。
@@ -77,7 +77,7 @@ title: Embedded system & Cross Compilation
     测试一下 tftp服务：
     ruisu@ruisu:~/share$ tftp 127.0.0.1 ，能在非tftp目录下下载文件即为成功。
 
-# #  3.3 配置nfs服务
+# #    3.3 配置nfs服务
     安装nfs服务器端：
     ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo apt-get install nfs-kernel-server
     设置NFS-Server目录：
