@@ -7,17 +7,13 @@ title: Embedded system & Cross Compilation
 #  1、背景 #
 ##   1.1、嵌入式系统 #
 这是维基百科词条，说明了嵌入式系统的特性、常见的试用领域：  
->An embedded system is a computer system with a dedicated function within a larger mechanical or   
-electrical system, often with real-time computing constraints. It is embedded as part of a complete   
-device often including hardware and mechanical parts. Embedded systems control many devices in   
-common use today. Ninety-eight percent of all microprocessors are manufactured as components   
-of embedded systems.
-
->Examples of properties of typical embedded computers when compared with general-purpose counterparts are low power consumption, small size, rugged operating ranges, and low per-unit cost. This comes at the price of limited processing resources, which make them significantly more difficult to program and to interact with. However, by building intelligence mechanisms on top of the hardware, taking advantage of possible existing sensors and the existence of a network of embedded units, one can both optimally manage available resources at the unit and network levels as well as provide augmented functions, well beyond those available.For example, intelligent techniques can be designed to manage power >consumption of embedded systems.
+>An embedded system is a computer system with a dedicated function within a larger mechanical or electrical system, often with real-time computing constraints. It is embedded as part of a complete device often including hardware and mechanical parts. Embedded systems control many devices in   
+common use today. Ninety-eight percent of all microprocessors are manufactured as components of embedded systems.
+Examples of properties of typical embedded computers when compared with general-purpose counterparts are low power consumption, small size, rugged operating ranges, and low per-unit cost. This comes at the price of limited processing resources, which make them significantly more difficult to program and to interact with. However, by building intelligence mechanisms on top of the hardware, taking advantage of possible existing sensors and the existence of a network of embedded units, one can both optimally manage available resources at the unit and network levels as well as provide augmented functions, well beyond those available.For example, intelligent techniques can be designed to manage power consumption of embedded systems.
 
 ##    1.2、交叉编译 #
 这是维基百科词条，说明了交叉编译的定义、存在的意义：  
->A cross compiler is a compiler capable of creating executable code for a platform other than the one on which the compiler is running. For example, a compiler that runs on a Windows 7 PC but generates code that runs on Android smartphone is a cross compiler. A cross compiler is necessary to compile code for multiple platforms from one development host. Direct compilation on the target platform might be infeasible, for example on a microcontroller of an embedded system, because those systems contain no operating system. In paravirtualization, one computer runs >multiple operating systems and a cross compiler could generate an executable for each of them from one main source.
+>A cross compiler is a compiler capable of creating executable code for a platform other than the one on which the compiler is running. For example, a compiler that runs on a Windows 7 PC but generates code that runs on Android smartphone is a cross compiler. A cross compiler is necessary to compile code for multiple platforms from one development host. Direct compilation on the target platform might be infeasible, for example on a microcontroller of an embedded system, because those systems contain no operating system. In paravirtualization, one computer runs multiple operating systems and a cross compiler could generate an executable for each of them from one main source.
 
 #  2、获取资料 #
 通常芯片公司推出一款芯片都会给出说明特性、开发套件。见 http://www.ti.com/product/TMS320DM8148/ 。
