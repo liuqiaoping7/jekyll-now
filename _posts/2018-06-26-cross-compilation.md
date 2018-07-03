@@ -21,7 +21,7 @@ Examples of properties of typical embedded computers when compared with general-
 +   说明特性  
 通常是给二次开发的项目负责人看的。项目负责人的职能是面对具体的问题或者需求找到合适的解决方案，而说明特性就是告诉他们如果你碰到了以下领域的问题或者以下指标需求，请选择我。见 [TMS320DM8148 DaVinci Digital Media Processor](http://www.ti.com/product/TMS320DM8148/description#descriptions) 。
 +   开发套件  
-通常是给二次开发的项目工程师看的。通常以评估板卡来展示外围接口扩展、以示例软件来展示实际业务能力。见[TMS320DM8148 DaVinci Digital Media Processor toolssoftware] (http://www.ti.com/product/TMS320DM8148/toolssoftware)。  
+通常是给二次开发的项目工程师看的。通常以评估板卡来展示外围接口扩展、以示例软件来展示实际业务能力。见 [TMS320DM8148 DaVinci Digital Media Processor toolssoftware] (http://www.ti.com/product/TMS320DM8148/toolssoftware)。  
 以下我们将以项目工程师的角色进行实际业务二次开发。
 
 #  3、环境搭建 #
