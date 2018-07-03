@@ -84,7 +84,7 @@ Examples of properties of typical embedded computers when compared with general-
     设置NFS-Server目录：
     ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo vi /etc/exports
      添加
-    /home/ruisu/share/rootfs-avcap	\*(rw,sync,no_subtree_check,no_root_squash)
+    /home/ruisu/share/rootfs-avcap  \*(rw,sync,no_subtree_check,no_root_squash)
     重启portmap（如果有必要）和nfs-kernel-server服务：
     ruisu@ruisu:~/share/rootfs-avcap$ sudo service portmap restart
     ruisu@ruisu:~/share/rootfs-avcap$ sudo service nfs-kernel-server restart
