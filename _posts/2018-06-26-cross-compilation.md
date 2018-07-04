@@ -93,7 +93,7 @@ Examples of properties of typical embedded computers when compared with general-
 
 
 #  4、二次开发 #
-##4.1、H264编码视频流写入文件，即录像功能 #  
+## 4.1、H264编码视频流写入文件，即录像功能 #  
 入口main函数:
 ```c
 int main ( int argc, char **argv )
@@ -555,7 +555,7 @@ static Void *dframe_ipcBitsRecvFxn(Void * prm)
 }
 ```
 
-##4.2、H264文件解码输出，即播放功能 #   
+## 4.2、H264文件解码输出，即播放功能 #
 入口main函数:  
 ```c
 int main ( int argc, char **argv )
