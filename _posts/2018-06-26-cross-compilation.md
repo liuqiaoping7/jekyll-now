@@ -93,7 +93,7 @@ Examples of properties of typical embedded computers when compared with general-
 
 
 #  4、二次开发 #
-先贴上关键部分的代码：  
+##4.1、H264编码视频流写入文件，即录像功能 #  
 入口main函数:
 ```c
 int main ( int argc, char **argv )
@@ -553,4 +553,39 @@ static Void *dframe_ipcBitsRecvFxn(Void * prm)
     }
     return NULL;
 }
+```
+
+##4.2、H264文件解码输出，即播放功能 #   
+入口main函数:  
+```c
+int main ( int argc, char **argv )
+{
+    void *dfctx;
+    df_ctx * ctx;
+    Bool done;
+    char ch[MAX_INPUT_STR_SIZE];
+    printf("**************dframe_create*************\n");
+    dfctx=dframe_create(1920, 1080, VSYS_STD_1080P_60,argc,argv);
+    printf("**************dframe_start*************\n");
+    dframe_start(dfctx);
+    done = FALSE;
+    while(!done)
+    {
+        fgets(ch, MAX_INPUT_STR_SIZE, stdin);
+        if(ch[1] != '\n' || ch[0] == '\n')
+        continue;
+        switch(ch[0])
+        {
+           case 'x':
+               done = TRUE;
+           break;
+           default:
+           break;
+        }
+    }
+    dframe_stop(dfctx);
+    dframe_delete(dfctx);
+    return (0);
+}
+
 ```
