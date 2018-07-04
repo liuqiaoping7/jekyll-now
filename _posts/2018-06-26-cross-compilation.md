@@ -589,7 +589,178 @@ int main ( int argc, char **argv )
 }
 ```
 dframe_create函数：  
-构建syslink可以参考TI官方资料，这里着重说明如何将文件中的视频流导入，请关注回调函数ipcBitsInHostPrm.cbFxn = bitsincallback;
+构建syslink可以参考TI官方资料，这里着重说明如何将文件中的视频流导入，请关注dframe_ipcBitsInitThrObj(ctx);
 ```c
+void* dframe_create(int outwidth, int outheight, int videostd,int argc, char **argv)
+{
+    df_ctx *ctx = (df_ctx*)malloc(sizeof(df_ctx));
 
+    if(ctx == NULL) return NULL;
+    if(argc>=2){
+        if((ctx->fp=fopen(argv[argc-1],"r"))==NULL)
+            return NULL;
+    }
+    else{
+        char name[20];
+        fflush(stdout);
+        OSA_printf("\n\nCHAINS:Enter file store name:");
+        fflush(stdin);
+        fscanf(stdin, "%s",name);
+        if((ctx->fp=fopen(name,"r"))==NULL)
+            return NULL;
+    }
+    SwMsLink_CreateParams		swMsPrm;
+    DisplayLink_CreateParams	displayPrm;
+    DupLink_CreateParams		dupPrm;
+    EncLink_CreateParams	 encPrm;
+    DecLink_CreateParams	 decPrm;
+    IpcLink_CreateParams	 ipcOutVpssPrm;
+    IpcLink_CreateParams	 ipcInVpssPrm;
+    IpcLink_CreateParams	 ipcOutVideoPrm;
+    IpcLink_CreateParams	 ipcInVideoPrm;
+    IpcBitsOutLinkHLOS_CreateParams   ipcBitsOutHostPrm;
+    IpcBitsOutLinkRTOS_CreateParams   ipcBitsOutVideoPrm;
+    IpcBitsInLinkHLOS_CreateParams	  ipcBitsInHostPrm;
+    IpcBitsInLinkRTOS_CreateParams	  ipcBitsInVideoPrm;
+    MergeLink_CreateParams			   mergePrm;
+
+    Int i;
+    Bool isProgressive;
+    System_LinkQueInfo bitsProducerLinkInfo;
+    UInt32 captureId, swMsId, displayId;
+    UInt32 encId, decId, mergeId, snkId, dupId;
+    UInt32 ipcOutVpssId, ipcInVpssId;
+    UInt32 ipcOutVideoId, ipcInVideoId;
+    UInt32 ipcBitsOutVideoId, ipcBitsInHostId;
+    UInt32 ipcBitsInVideoId, ipcBitsOutHostId;
+    char ch;
+    UInt32 vipInstId;
+
+    SwMsLink_CreateParams_Init(&swMsPrm);
+    DisplayLink_CreateParams_Init(&displayPrm);
+    CHAINS_INIT_STRUCT(IpcLink_CreateParams,ipcInVpssPrm);
+    CHAINS_INIT_STRUCT(IpcLink_CreateParams,ipcOutVideoPrm);
+    CHAINS_INIT_STRUCT(IpcBitsOutLinkHLOS_CreateParams,ipcBitsOutHostPrm);
+    CHAINS_INIT_STRUCT(IpcBitsInLinkRTOS_CreateParams,ipcBitsInVideoPrm);
+    CHAINS_INIT_STRUCT(DecLink_CreateParams, decPrm);
+
+    swMsId		= SYSTEM_LINK_ID_SW_MS_MULTI_INST_0;
+    displayId	= SYSTEM_LINK_ID_DISPLAY_0;
+    decId  = SYSTEM_LINK_ID_VDEC_0;
+    ipcOutVideoId= SYSTEM_VIDEO_LINK_ID_IPC_OUT_M3_0;
+    ipcInVpssId  = SYSTEM_VPSS_LINK_ID_IPC_IN_M3_0;
+    ipcBitsOutHostId  = SYSTEM_HOST_LINK_ID_IPC_BITS_OUT_0;
+    ipcBitsInVideoId  = SYSTEM_VIDEO_LINK_ID_IPC_BITS_IN_0;
+
+#ifdef A8_CONTROL_I2C
+    Device_Sii9135Handle sii9135Handle;
+#endif
+    System_init();
+    ipcBitsOutHostPrm.inQueInfo.numCh = 1;
+    ipcBitsOutHostPrm.inQueInfo.chInfo[0].bufType = SYSTEM_BUF_TYPE_VIDBITSTREAM;
+    ipcBitsOutHostPrm.inQueInfo.chInfo[0].height = 1080;
+    ipcBitsOutHostPrm.inQueInfo.chInfo[0].width = 1920;
+    ipcBitsOutHostPrm.inQueInfo.chInfo[0].codingformat = IVIDEO_H264HP;
+    ipcBitsOutHostPrm.inQueInfo.chInfo[0].memType = SYSTEM_MT_TILEDMEM;
+    ipcBitsOutHostPrm.inQueInfo.chInfo[0].dataFormat = IVIDEO_H264HP;
+    ipcBitsOutHostPrm.inQueInfo.chInfo[0].scanFormat = SYSTEM_SF_PROGRESSIVE;
+    ipcBitsOutHostPrm.inQueInfo.chInfo[0].startX         = 0;
+    ipcBitsOutHostPrm.inQueInfo.chInfo[0].startY         = 0;
+    ipcBitsOutHostPrm.inQueInfo.chInfo[0].pitch[0]       = 0;
+    ipcBitsOutHostPrm.inQueInfo.chInfo[0].pitch[1]       = 0;
+    ipcBitsOutHostPrm.inQueInfo.chInfo[0].pitch[2]       = 0;
+    ipcBitsOutHostPrm.baseCreateParams.numOutQue = 1;
+    ipcBitsOutHostPrm.baseCreateParams.numChPerOutQue[0] = 1;
+    ipcBitsOutHostPrm.baseCreateParams.outQueParams[0].nextLink = ipcBitsInVideoId;
+    ipcBitsOutHostPrm.baseCreateParams.notifyNextLink = FALSE;
+    ipcBitsOutHostPrm.baseCreateParams.notifyPrevLink = FALSE;
+    ipcBitsOutHostPrm.baseCreateParams.noNotifyMode = TRUE;
+
+    ipcBitsInVideoPrm.baseCreateParams.inQueParams.prevLinkId = ipcBitsOutHostId;
+    ipcBitsInVideoPrm.baseCreateParams.inQueParams.prevLinkQueId = 0;
+    ipcBitsInVideoPrm.baseCreateParams.numOutQue				 = 1;
+    ipcBitsInVideoPrm.baseCreateParams.outQueParams[0].nextLink = decId;
+    Chains_ipcBitsInitCreateParams_BitsInRTOS(&ipcBitsInVideoPrm, TRUE);
+
+    for (i=0; i<1; i++) {
+        decPrm.chCreateParams[i].format 		 = IVIDEO_H264HP;
+        decPrm.chCreateParams[i].profile		 = IH264VDEC_PROFILE_ANY;
+        decPrm.chCreateParams[i].targetMaxWidth  = 1920;
+        decPrm.chCreateParams[i].targetMaxHeight = 1080;
+        if (isProgressive)
+            decPrm.chCreateParams[i].fieldMergeDecodeEnable  = FALSE;
+        else
+            decPrm.chCreateParams[i].fieldMergeDecodeEnable  = TRUE;
+        decPrm.chCreateParams[i].numBufPerCh = 6;
+        decPrm.chCreateParams[i].defaultDynamicParams.targetFrameRate = 30;
+        decPrm.chCreateParams[i].defaultDynamicParams.targetBitRate = (2 * 1000 * 1000);
+    }
+    decPrm.inQueParams.prevLinkId = ipcBitsInVideoId;
+    decPrm.inQueParams.prevLinkQueId = 0;
+    decPrm.outQueParams.nextLink	 = ipcOutVideoId;
+
+    ipcOutVideoPrm.inQueParams.prevLinkId	 = decId;
+    ipcOutVideoPrm.inQueParams.prevLinkQueId = 0;
+    ipcOutVideoPrm.numOutQue				   = 1;
+    ipcOutVideoPrm.outQueParams[0].nextLink 	= ipcInVpssId;
+    ipcOutVideoPrm.notifyNextLink			 = TRUE;
+    ipcOutVideoPrm.notifyPrevLink			 = TRUE;
+
+    ipcInVpssPrm.inQueParams.prevLinkId    = ipcOutVideoId;
+    ipcInVpssPrm.inQueParams.prevLinkQueId = 0;
+    ipcInVpssPrm.numOutQue					  = 1;
+    ipcInVpssPrm.outQueParams[0].nextLink	= swMsId;
+    ipcInVpssPrm.notifyNextLink 		   = TRUE;
+    ipcInVpssPrm.notifyPrevLink 		   = TRUE;
+
+    swMsPrm.inQueParams.prevLinkId = ipcInVpssId;
+    swMsPrm.inQueParams.prevLinkQueId = 0;
+    swMsPrm.outQueParams.nextLink	  = displayId;
+    swMsPrm.numSwMsInst = 1;
+    swMsPrm.swMsInstId[0] = SYSTEM_SW_MS_SC_INST_SC5;
+    swMsPrm.maxInputQueLen			  = 4;
+    swMsPrm.maxOutRes				  = VSYS_STD_1080P_60;
+    swMsPrm.numOutBuf				  = 8;
+    swMsPrm.lineSkipMode			  = TRUE;
+    swMsPrm.layoutPrm.outputFPS 	  = 60;
+    Chains_swMsGenerateLayoutParams(0, 2, &swMsPrm);
+
+    displayPrm.inQueParams[0].prevLinkId	= swMsId;
+    displayPrm.inQueParams[0].prevLinkQueId = 0;
+    displayPrm.displayRes	= swMsPrm.maxOutRes;
+
+    UInt32 displayRes[SYSTEM_DC_MAX_VENC] =
+    {
+        VSYS_STD_1080P_60,   //SYSTEM_DC_VENC_HDMI,
+        VSYS_STD_1080P_60,    //SYSTEM_DC_VENC_HDCOMP,
+        VSYS_STD_1080P_60,    //SYSTEM_DC_VENC_DVO2
+        VSYS_STD_NTSC        //SYSTEM_DC_VENC_SD,
+    };
+    Chains_displayCtrlInit(displayRes);
+
+    printf("**************ipcBitsOutHostId*************\n");
+    System_linkCreate(ipcBitsOutHostId,&ipcBitsOutHostPrm,sizeof(ipcBitsOutHostPrm));
+    printf("**************ipcBitsInVideoId*************\n");
+    System_linkCreate(ipcBitsInVideoId,&ipcBitsInVideoPrm,sizeof(ipcBitsInVideoPrm));
+    printf("**************decId*************\n");
+    System_linkCreate(decId, &decPrm, sizeof(decPrm));
+    printf("**************ipcOutVideoId*************\n");
+    System_linkCreate(ipcOutVideoId, &ipcOutVideoPrm, sizeof(ipcOutVideoPrm));
+    printf("**************ipcInVpssId*************\n");
+    System_linkCreate(ipcInVpssId  , &ipcInVpssPrm	, sizeof(ipcInVpssPrm)	);
+    printf("*************swMsId**************\n");
+    System_linkCreate(swMsId  , &swMsPrm, sizeof(swMsPrm));
+    printf("**************displayId*************\n");
+    System_linkCreate(displayId, &displayPrm, sizeof(displayPrm));
+
+    ctx->swMsId		= swMsId;
+    ctx->displayId	= displayId;
+    ctx->ipcBitsOutHostId	= ipcBitsOutHostId;
+    ctx->ipcBitsInVideoId	= ipcBitsInVideoId;
+    ctx->decId	= decId;
+    ctx->ipcOutVideoId	= ipcOutVideoId;
+    ctx->ipcInVpssId	= ipcInVpssId;
+    dframe_ipcBitsInitThrObj(ctx);
+    return ctx;
+}
 ```
