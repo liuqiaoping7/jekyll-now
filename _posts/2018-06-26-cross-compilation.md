@@ -37,59 +37,59 @@ Examples of properties of typical embedded computers when compared with general-
     再编译应该就没有问题了。
 
 ##    3.2 配置tftp服务 #
-    安装tftp：
-    ruisu@ruisu:~/share$ sudo apt-get install tftp-hpa tftpd-hpa xinetd
-    这里tftpd为服务端tftp为客户端(可以用于测试服务端是否成功)。
-    创建tftp目录：
-    ruisu@ruisu:~/share$ mkdir tftproot
-    ruisu@ruisu:~/share$ chmod 777 tftproot
-    修改tftp配置文件，如果没有就创建：
-    ruisu@ruisu:~/share$ sudo vi /etc/xinetd.d/tftp
-    添加
-    service tftp
-             {
-                 disable         = no
-                 socket_type     = dgram
-                 protocol        = udp
-                 wait            = yes
-                 user            = ruisu
-                 server          = /usr/sbin/in.tftpd
-                 server_args     = -s /home/ruisu/share/tftproot
-                 source          = 11
-                 cps             = 100 2
-                 flags =IPv4
-             }
-    ruisu@ruisu:~/share$ sudo vi /etc/inetd.conf
-    添加
-    tftp	dgram	udp	wait	nobody		/usr/sbin/tcpd
-    /usr/sbin/in.tftpd	/home/ruisu/share/tftproot
-    ruisu@ruisu:~/share$ sudo vi /etc/default/tftpd-hpa
-    改为
-    #RUN_DAEMON="no"
-    #OPTIONS="-s /home/ruisu/share/tftproot -c -p -U tftpd"
-    TFTP_USERNAME="tftp"
-    TFTP_DIRECTORY="/home/ruisu/share/tftproot"
-    TFTP_ADDRESS="0.0.0.0:69"
-    TFTP_OPTIONS="-l -c -s"
-    重启tftp服务：
-    ruisu@ruisu:~/share$ sudo service xinetd restart
-    xinetd stop/waiting
-    xinetd start/running, process 5159
-    测试一下 tftp服务：
-    ruisu@ruisu:~/share$ tftp 127.0.0.1 ，能在非tftp目录下下载文件即为成功。
+安装tftp：
+ruisu@ruisu:~/share$ sudo apt-get install tftp-hpa tftpd-hpa xinetd  
+这里tftpd为服务端tftp为客户端(可以用于测试服务端是否成功)。  
+创建tftp目录：  
+ruisu@ruisu:~/share$ mkdir tftproot  
+ruisu@ruisu:~/share$ chmod 777 tftproot  
+修改tftp配置文件，如果没有就创建：  
+ruisu@ruisu:~/share$ sudo vi /etc/xinetd.d/tftp  
+添加  
+service tftp  
+         {  
+             disable         = no  
+             socket_type     = dgram  
+             protocol        = udp  
+             wait            = yes  
+             user            = ruisu  
+             server          = /usr/sbin/in.tftpd  
+             server_args     = -s /home/ruisu/share/tftproot  
+             source          = 11  
+             cps             = 100 2   
+             flags =IPv4  
+         }  
+ruisu@ruisu:~/share$ sudo vi /etc/inetd.conf  
+添加  
+tftp	dgram	udp	wait	nobody		/usr/sbin/tcpd  
+/usr/sbin/in.tftpd	/home/ruisu/share/tftproot  
+ruisu@ruisu:~/share$ sudo vi /etc/default/tftpd-hpa  
+改为  
+#RUN_DAEMON="no"  
+#OPTIONS="-s /home/ruisu/share/tftproot -c -p -U tftpd"  
+TFTP_USERNAME="tftp"  
+TFTP_DIRECTORY="/home/ruisu/share/tftproot"  
+TFTP_ADDRESS="0.0.0.0:69"  
+TFTP_OPTIONS="-l -c -s"  
+重启tftp服务：  
+ruisu@ruisu:~/share$ sudo service xinetd restart  
+xinetd stop/waiting  
+xinetd start/running, process 5159  
+测试一下 tftp服务：  
+ruisu@ruisu:~/share$ tftp 127.0.0.1 ，能在非tftp目录下下载文件即为成功。  
 
 ##    3.3 配置nfs服务 #
-    安装nfs服务器端：
-    ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo apt-get install nfs-kernel-server
-    设置NFS-Server目录：
-    ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo vi /etc/exports
-     添加
-    /home/ruisu/share/rootfs-avcap    *(rw,sync,no_subtree_check,no_root_squash)
-    重启portmap（如果有必要）和nfs-kernel-server服务*：
-    ruisu@ruisu:~/share/rootfs-avcap$ sudo service portmap restart
-    ruisu@ruisu:~/share/rootfs-avcap$ sudo service nfs-kernel-server restart
-    测试本机能否挂载成功：
-    ruisu@ruisu:~/share/rootfs-avcap$ sudo mount -t nfs 192.168.1.119:/home/ruisu/share/rootfs-avcap /mnt/share
+安装nfs服务器端：
+ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo apt-get install nfs-kernel-server
+设置NFS-Server目录：
+ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo vi /etc/exports
+ 添加
+/home/ruisu/share/rootfs-avcap    \*(rw,sync,no_subtree_check,no_root_squash)
+重启portmap（如果有必要）和nfs-kernel-server服务：
+ruisu@ruisu:~/share/rootfs-avcap$ sudo service portmap restart
+ruisu@ruisu:~/share/rootfs-avcap$ sudo service nfs-kernel-server restart
+测试本机能否挂载成功：
+ruisu@ruisu:~/share/rootfs-avcap$ sudo mount -t nfs 192.168.1.119:/home/ruisu/share/rootfs-avcap /mnt/share
 
 
 #  4、二次开发 #
@@ -587,5 +587,9 @@ int main ( int argc, char **argv )
     dframe_delete(dfctx);
     return (0);
 }
+```
+dframe_create函数：  
+构建syslink可以参考TI官方资料，这里着重说明如何将文件中的视频流导入，请关注回调函数ipcBitsInHostPrm.cbFxn = bitsincallback;
+```c
 
 ```
