@@ -2,7 +2,7 @@
 layout: post
 title: Embedded system & Cross Compilation
 ---
-以下我们选取TI公司的DM814x/AM387x EVM Baseboard为平台来讨论嵌入式系统、交叉编译环境的一些常识。
+以下我们选取TI公司搭载DaVinci Video Processors的DM814x/AM387x EVM Baseboard为平台来讨论嵌入式系统、交叉编译环境的一些常识。
 
 #  1、背景 #
 ##   1.1、嵌入式系统 #
@@ -85,7 +85,7 @@ Examples of properties of typical embedded computers when compared with general-
     ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo vi /etc/exports
      添加
     /home/ruisu/share/rootfs-avcap    *(rw,sync,no_subtree_check,no_root_squash)
-    重启portmap（如果有必要）和nfs-kernel-server服务：
+    重启portmap（如果有必要）和nfs-kernel-server服务*：
     ruisu@ruisu:~/share/rootfs-avcap$ sudo service portmap restart
     ruisu@ruisu:~/share/rootfs-avcap$ sudo service nfs-kernel-server restart
     测试本机能否挂载成功：
@@ -93,3 +93,44 @@ Examples of properties of typical embedded computers when compared with general-
 
 
 #  4、二次开发 #
+先贴上关键部分的代码：
+主程序:
+```c
+int main ( int argc, char **argv )
+{
+    void *dfctx;
+    df_ctx * ctx;
+    Bool done;
+    char ch[MAX_INPUT_STR_SIZE];
+    printf("**************dframe_create*************\n");
+    dfctx=dframe_create(1920, 1080, VSYS_STD_1080P_60,argc,argv);
+    printf("**************dframe_start*************\n");
+    dframe_start(dfctx);
+    done = FALSE;
+
+    while(!done)
+    {
+        fgets(ch, MAX_INPUT_STR_SIZE, stdin);
+        if(ch[1] != '\n' || ch[0] == '\n')
+        continue;
+        switch(ch[0])
+        {
+            case 's':
+                //ctx->getStart=1;
+            break;
+            case 'x':
+                done = TRUE;
+            break;
+            case 'e':
+                //ctx->getStart=0;
+                break;
+            default:
+                //printf("This is a simple video capture/display test video source should be 1080P 60hz, please input x then ENTER for exit, otherwise vpss m4 will need reboot!!\r\n");
+            break;
+        }
+    }
+    dframe_stop(dfctx);
+    dframe_delete(dfctx);
+    return (0);
+}
+```
