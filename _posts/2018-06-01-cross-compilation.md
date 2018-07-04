@@ -94,10 +94,10 @@ ruisu@ruisu:~/share/rootfs-avcap$ sudo mount -t nfs 192.168.1.119:/home/ruisu/sh
 ## 3.4 uboot启动参数 #
 以上PC服务都是为嵌入式系统启动准备的，二者通过uboot关联起来。  
 设定启动命令：  
-setenv bootcmd 'tftpboot 0x81000000 uImage_rs8148;bootm 0x81000000'。
+setenv bootcmd 'tftpboot 0x81000000 uImage_rs8148;bootm 0x81000000'。  
 设定启动参数：  
-setenv bootargs 'console=ttyO0,115200n8 noinitrd ip=dhcp root=/dev/nfs nfsroot=192.168.1.119:/home/ruisu/share/rootfs-avcap,nolock rw mem=384M vram=128M ti814xfb.vram=0:120M,1:4M,2:4M notifyk.vpssm3_sva=0xafd00000'。
-注：以上uImage_rs8148为linux内核映像，务必位于host tftp目录下，/home/ruisu/rootfs-avcap为host nfs。
+setenv bootargs 'console=ttyO0,115200n8 noinitrd ip=dhcp root=/dev/nfs nfsroot=192.168.1.119:/home/ruisu/share/rootfs-avcap,nolock rw mem=384M vram=128M ti814xfb.vram=0:120M,1:4M,2:4M notifyk.vpssm3_sva=0xafd00000'。  
+注：以上uImage_rs8148为linux内核映像，务必位于host tftp目录下，/home/ruisu/rootfs-avcap为host nfs。  
 
 #  4、二次开发 #
 ## 4.1、H264编码视频流写入文件，即录像功能 #  
