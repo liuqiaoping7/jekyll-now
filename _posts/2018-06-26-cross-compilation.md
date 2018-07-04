@@ -94,7 +94,7 @@ ruisu@ruisu:~/share/rootfs-avcap$ sudo mount -t nfs 192.168.1.119:/home/ruisu/sh
 
 #  4、二次开发 #
 ## 4.1、H264编码视频流写入文件，即录像功能 #  
-入口main函数:
+入口main函数如下。
 ```c
 int main ( int argc, char **argv )
 {
@@ -134,8 +134,7 @@ int main ( int argc, char **argv )
     return (0);
 }
 ```
-dframe_create函数：  
-构建syslink可以参考TI官方资料，这里着重说明如何将编码后的视频流写入文件，请关注回调函数ipcBitsInHostPrm.cbFxn = bitsincallback;
+dframe_create函数，构建syslink可以参考TI官方资料。这里着重说明如何将编码后的视频流写入文件，主要关注回调函数ipcBitsInHostPrm.cbFxn = bitsincallback。
 ```c
 void* dframe_create(int outwidth, int outheight, int videostd,int argc, char **argv)
 {
@@ -496,7 +495,7 @@ void* dframe_create(int outwidth, int outheight, int videostd,int argc, char **a
     return ctx;
 }
 ```
-bitsincallback发送信号量：  
+bitsincallback发送信号量。  
 ```c
 void bitsincallback(void *ctx)
 {
@@ -556,7 +555,7 @@ static Void *dframe_ipcBitsRecvFxn(Void * prm)
 ```
 
 ## 4.2、H264文件解码输出，即播放功能 #
-入口main函数:  
+入口main函数如下。
 ```c
 int main ( int argc, char **argv )
 {
@@ -588,8 +587,7 @@ int main ( int argc, char **argv )
     return (0);
 }
 ```
-dframe_create函数：  
-构建syslink可以参考TI官方资料，这里着重说明如何将文件中的视频流导入，请关注dframe_ipcBitsInitThrObj(ctx);
+dframe_create 函数，构建syslink可以参考TI官方资料。这里着重说明如何将文件中的视频流导入，我们主要关注 dframe_ipcBitsInitThrObj(ctx)。
 ```c
 void* dframe_create(int outwidth, int outheight, int videostd,int argc, char **argv)
 {
@@ -764,7 +762,7 @@ void* dframe_create(int outwidth, int outheight, int videostd,int argc, char **a
     return ctx;
 }
 ```
-dframe_ipcBitsInitThrObj函数创建信号量、buff队列、并建立新的线程，下面我们主要关注dframe_ipcBitsSendFxn。  
+dframe_ipcBitsInitThrObj函数创建信号量、buff队列、并建立新的线程，我们主要关注dframe_ipcBitsSendFxn。  
 ```c
 static Void dframe_ipcBitsInitThrObj(df_ctx *thrObj)
 {
@@ -781,8 +779,7 @@ static Void dframe_ipcBitsInitThrObj(df_ctx *thrObj)
 }
 ```
 dframe_ipcBitsSendFxn这个新的线程循环体中IpcBitsOutLink_getEmptyVideoBitStreamBufs 与 IpcBitsOutLink_putFullVideoBitStreamBufs 构成一对，
-将 dframe_read_frame_h264 从文件中读入的视频流输入到 ipcBitsOutHostId 对应的syslink中，现在你应该知道了视频流的来龙去脉了吧。
-下面我们来分析关键的 dframe_read_frame_h264函数。
+将 dframe_read_frame_h264 从文件中读入的视频流输入到 ipcBitsOutHostId 对应的syslink中，现在视频流的来龙去脉一目了然。
 ```c
 static Void *dframe_ipcBitsSendFxn(Void * prm)
 {
@@ -840,7 +837,7 @@ static Void *dframe_ipcBitsSendFxn(Void * prm)
     return NULL;
 }
 ```
-视频文件存储是对应一帧帧的图像的，唯一不同的是采用了各式各样的压缩技术。 从 dframe_read_frame_h264 函数你可以领略到其中的意味。
+视频文件存储是对应一帧帧的图像的，唯一不同的是采用了各式各样的压缩技术。 从 dframe_read_frame_h264 函数你可以领略到其中的意味。下面我们来分析关键的 dframe_read_frame_h264 函数。
 ```c
 #define DFRAME_FRAMEPOOL_TBL_SIZE                            (128)
 #define DFRAME_FRAMEPOOL_INVALIDID                           (~0u)
