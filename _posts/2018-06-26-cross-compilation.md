@@ -93,8 +93,8 @@ Examples of properties of typical embedded computers when compared with general-
 
 
 #  4、二次开发 #
-先贴上关键部分的代码：
-主程序:
+先贴上关键部分的代码：  
+入口main函数:
 ```c
 int main ( int argc, char **argv )
 {
@@ -132,5 +132,425 @@ int main ( int argc, char **argv )
     dframe_stop(dfctx);
     dframe_delete(dfctx);
     return (0);
+}
+```
+dframe_create函数：  
+构建syslink可以参考TI官方资料，这里着重说明如何将编码后的视频流写入文件，请关注回调函数ipcBitsInHostPrm.cbFxn = bitsincallback;
+```c
+void* dframe_create(int outwidth, int outheight, int videostd,int argc, char **argv)
+{
+    df_ctx *ctx = (df_ctx*)malloc(sizeof(df_ctx));
+    if(ctx == NULL) return NULL;
+    char name[20];
+    if(argc>=2){
+    if((ctx->fp=fopen(argv[argc-1],"w"))==NULL)
+        return NULL;
+    }else{
+        fflush(stdout);
+        OSA_printf("\n\nCHAINS:Enter file store name:");
+        fflush(stdin);
+        fscanf(stdin,"%s",name);
+        if((ctx->fp=fopen(name,"w"))==NULL)
+        return NULL;
+    }
+
+    DeiLink_CreateParams deiPrm;
+    CaptureLink_CreateParams	capturePrm;
+    CaptureLink_VipInstParams *pCaptureInstPrm;// only a vessel
+    CaptureLink_OutParams	  *pCaptureOutPrm;
+    SwMsLink_CreateParams		swMsPrm;
+    DisplayLink_CreateParams	displayPrm;
+    DupLink_CreateParams		dupPrm;
+    EncLink_CreateParams	 encPrm;
+    DecLink_CreateParams	 decPrm;
+    IpcLink_CreateParams	 ipcOutVpssPrm;
+    IpcLink_CreateParams	 ipcInVpssPrm;
+    IpcLink_CreateParams	 ipcOutVideoPrm;
+    IpcLink_CreateParams	 ipcInVideoPrm;
+    IpcBitsOutLinkHLOS_CreateParams   ipcBitsOutHostPrm;
+    IpcBitsOutLinkRTOS_CreateParams   ipcBitsOutVideoPrm;
+    IpcBitsInLinkHLOS_CreateParams	  ipcBitsInHostPrm;
+    IpcBitsInLinkRTOS_CreateParams	  ipcBitsInVideoPrm;
+    Int i;
+    Bool isProgressive;
+    System_LinkInfo bitsProducerLinkInfo;
+
+    UInt32 captureId, deiId, displayId;
+    UInt32 encId, decId, snkId, dupId;
+    UInt32 ipcOutVpssId, ipcInVpssId;
+    UInt32 ipcOutVideoId, ipcInVideoId;
+    UInt32 ipcBitsOutVideoId, ipcBitsInHostId;
+    UInt32 ipcBitsInVideoId, ipcBitsOutHostId;
+    char ch;
+    UInt32 vipInstId;
+
+    CaptureLink_CreateParams_Init(&capturePrm);
+    DisplayLink_CreateParams_Init(&displayPrm);
+    DeiLink_CreateParams_Init(&deiPrm);
+    CHAINS_INIT_STRUCT(IpcLink_CreateParams,ipcOutVpssPrm);
+    CHAINS_INIT_STRUCT(IpcLink_CreateParams,ipcInVpssPrm);
+    CHAINS_INIT_STRUCT(IpcLink_CreateParams,ipcOutVideoPrm);
+    CHAINS_INIT_STRUCT(IpcLink_CreateParams,ipcInVideoPrm);
+    CHAINS_INIT_STRUCT(IpcBitsOutLinkHLOS_CreateParams,ipcBitsOutHostPrm);
+    CHAINS_INIT_STRUCT(IpcBitsOutLinkRTOS_CreateParams,ipcBitsOutVideoPrm);
+    CHAINS_INIT_STRUCT(IpcBitsInLinkHLOS_CreateParams,ipcBitsInHostPrm);
+    CHAINS_INIT_STRUCT(IpcBitsInLinkRTOS_CreateParams,ipcBitsInVideoPrm);
+    CHAINS_INIT_STRUCT(DecLink_CreateParams, decPrm);
+    CHAINS_INIT_STRUCT(EncLink_CreateParams, encPrm);
+
+    captureId	= SYSTEM_LINK_ID_CAPTURE;
+    deiId = SYSTEM_LINK_ID_DEI_0;
+    displayId	= SYSTEM_LINK_ID_DISPLAY_0;
+    encId  = SYSTEM_LINK_ID_VENC_0;
+    dupId = SYSTEM_VPSS_LINK_ID_DUP_0;
+    ipcOutVpssId = SYSTEM_VPSS_LINK_ID_IPC_OUT_M3_0;
+    ipcInVideoId = SYSTEM_VIDEO_LINK_ID_IPC_IN_M3_0;
+    ipcOutVideoId= SYSTEM_VIDEO_LINK_ID_IPC_OUT_M3_0;
+    ipcInVpssId  = SYSTEM_VPSS_LINK_ID_IPC_IN_M3_0;
+    ipcBitsOutVideoId = SYSTEM_VIDEO_LINK_ID_IPC_BITS_OUT_0;
+    ipcBitsInHostId   = SYSTEM_HOST_LINK_ID_IPC_BITS_IN_0;
+    ipcBitsOutHostId  = SYSTEM_HOST_LINK_ID_IPC_BITS_OUT_0;
+    ipcBitsInVideoId  = SYSTEM_VIDEO_LINK_ID_IPC_BITS_IN_0;
+
+#ifdef A8_CONTROL_I2C
+    Device_Sii9135Handle sii9135Handle;
+#endif
+#ifdef A8_CONTROL_I2C
+    {
+        Int32 status = 0;
+        Device_VideoDecoderChipIdParams 	 vidDecChipIdArgs;
+        Device_VideoDecoderChipIdStatus 	 vidDecChipIdStatus;
+        VCAP_VIDEO_SOURCE_STATUS_PARAMS_S	 videoStatusArgs;
+        VCAP_VIDEO_SOURCE_CH_STATUS_S		 videoStatus;
+
+        Device_VideoDecoderCreateParams 	 createArgs;
+        Device_VideoDecoderCreateStatus 	 createStatusArgs;
+
+        Device_VideoDecoderVideoModeParams				   vidDecVideoModeArgs;
+
+        printf(" set sii9135\r\n");
+        /* Initialize and create video decoders */
+        Device_sii9135Init();
+
+        memset(&createArgs, 0, sizeof(Device_VideoDecoderCreateParams));
+
+        createArgs.deviceI2cInstId	  = 0;
+        createArgs.numDevicesAtPort   = 1;
+        createArgs.deviceI2cAddr[0]   = Device_getVidDecI2cAddr(DEVICE_VID_DEC_SII9135_DRV,0);
+        createArgs.deviceResetGpio[0] = DEVICE_VIDEO_DECODER_GPIO_NONE;
+
+        sii9135Handle = Device_sii9135Create(		   DEVICE_VID_DEC_SII9135_DRV,
+                               0, // instId - need to change
+                               &(createArgs),
+                               &(createStatusArgs));
+
+        vidDecChipIdArgs.deviceNum = 0;
+
+        status = Device_sii9135Control(sii9135Handle,
+                         IOCTL_DEVICE_VIDEO_DECODER_GET_CHIP_ID,
+                         &vidDecChipIdArgs,
+                         &vidDecChipIdStatus);
+        if (status >= 0)
+        {
+            videoStatusArgs.channelNum = 0;
+
+            status = Device_sii9135Control(sii9135Handle,
+                           IOCTL_DEVICE_VIDEO_DECODER_GET_VIDEO_STATUS,
+                           &videoStatusArgs, &videoStatus);
+
+            if (videoStatus.isVideoDetect)
+            {
+                if(videoStatus.frameInterval==0) videoStatus.frameInterval=1;
+
+                printf(" VCAP: SII9135 (0x%02x): Detected video (%dx%d@%dHz, %d) !!!\n",
+                    createArgs.deviceI2cAddr[0],
+                    videoStatus.frameWidth,
+                    videoStatus.frameHeight,
+                    1000000 / videoStatus.frameInterval,
+                    videoStatus.isInterlaced);
+
+                if(videoStatus.isInterlaced)
+                    videostd = DF_STD_1080I_60;
+                else
+                    videostd = DF_STD_1080P_60;
+            }
+            else
+            {
+                printf(" VCAP: SII9135 (0x%02x):  NO Video Detected !, try again\n", createArgs.deviceI2cAddr[0]);
+#if 1
+                usleep(100000);
+
+                status = Device_sii9135Control(sii9135Handle,
+                            IOCTL_DEVICE_VIDEO_DECODER_GET_VIDEO_STATUS,
+                            &videoStatusArgs, &videoStatus);
+
+                if (videoStatus.isVideoDetect)
+                {
+                    if(videoStatus.frameInterval==0) videoStatus.frameInterval=1;
+
+                    printf(" VCAP: SII9135 (0x%02x): Detected video (%dx%d@%dHz, %d) !!!\n",
+                        createArgs.deviceI2cAddr[0],
+                        videoStatus.frameWidth,
+                        videoStatus.frameHeight,
+                        1000000 / videoStatus.frameInterval,
+                        videoStatus.isInterlaced);
+
+                    if(videoStatus.isInterlaced)
+                        videostd = DF_STD_1080I_60;
+                    else
+                        videostd = DF_STD_1080P_60;
+                }
+                else
+                {
+                    printf(" VCAP: SII9135 (0x%02x):  NO Video Detected !!!\n", createArgs.deviceI2cAddr[0]);
+                    Device_sii9135Delete(sii9135Handle, NULL);
+                    Device_sii9135DeInit();
+                    System_deInit();
+                    return NULL;
+                }
+#endif
+            }
+        }
+        else
+        {
+            printf(" VCAP: SII9135 (0x%02x): Device not found !!!\n", createArgs.deviceI2cAddr[0]);
+        }
+
+        /* Configure video decoder */
+        memset(&vidDecVideoModeArgs,0, sizeof(Device_VideoDecoderVideoModeParams));
+        vidDecVideoModeArgs.videoIfMode 	   = DEVICE_CAPT_VIDEO_IF_MODE_16BIT;
+        vidDecVideoModeArgs.videoDataFormat    = SYSTEM_DF_YUV422P;
+        vidDecVideoModeArgs.standard		   = videostd;
+        vidDecVideoModeArgs.videoCaptureMode   = DEVICE_CAPT_VIDEO_CAPTURE_MODE_SINGLE_CH_NON_MUX_EMBEDDED_SYNC;
+        vidDecVideoModeArgs.videoSystem 	   = DEVICE_VIDEO_DECODER_VIDEO_SYSTEM_NONE;
+        vidDecVideoModeArgs.videoCropEnable    = FALSE;
+        vidDecVideoModeArgs.videoAutoDetectTimeout = -1;
+
+        status = Device_sii9135Control(sii9135Handle,IOCTL_DEVICE_VIDEO_DECODER_SET_VIDEO_MODE,&vidDecVideoModeArgs,NULL);
+    }
+    ctx->sii9135Handle=sii9135Handle;
+#endif
+
+    System_init();
+    capturePrm.numVipInst = 1;
+    capturePrm.outQueParams[0].nextLink = dupId;
+    capturePrm.tilerEnable				= FALSE;
+    capturePrm.enableSdCrop 			= FALSE;
+    pCaptureInstPrm 					= &capturePrm.vipInst[0];
+    pCaptureInstPrm->vipInstId			= SYSTEM_CAPTURE_INST_VIP1_PORTA;
+#ifndef A8_CONTROL_I2C
+    pCaptureInstPrm->videoDecoderId 	= SYSTEM_DEVICE_VID_DEC_SII9135_DRV;
+#endif
+    pCaptureInstPrm->inDataFormat		= SYSTEM_DF_YUV422P;
+    pCaptureInstPrm->standard			= videostd;
+    pCaptureInstPrm->numOutput			= 1;
+    pCaptureOutPrm						= &pCaptureInstPrm->outParams[0];
+    pCaptureOutPrm->dataFormat			= SYSTEM_DF_YUV420SP_UV;
+    pCaptureOutPrm->scEnable			= FALSE;
+    pCaptureOutPrm->scOutWidth			= outwidth;
+    pCaptureOutPrm->scOutHeight 		= outheight;
+    pCaptureOutPrm->outQueId			= 0;
+
+    dupPrm.inQueParams.prevLinkId = captureId;
+    dupPrm.inQueParams.prevLinkQueId= 0;
+    dupPrm.outQueParams[0].nextLink = deiId;
+    dupPrm.outQueParams[1].nextLink = ipcOutVpssId;
+    dupPrm.numOutQue				   = 2;
+    dupPrm.notifyNextLink			   = TRUE;
+
+    ipcOutVpssPrm.inQueParams.prevLinkId    = dupId;
+    ipcOutVpssPrm.inQueParams.prevLinkQueId = 1;
+    ipcOutVpssPrm.numOutQue                 = 1;
+    ipcOutVpssPrm.outQueParams[0].nextLink  = ipcInVideoId;
+    ipcOutVpssPrm.notifyNextLink            = TRUE;
+    ipcOutVpssPrm.notifyPrevLink            = TRUE;
+    ipcOutVpssPrm.noNotifyMode              = FALSE;
+
+    ipcInVideoPrm.inQueParams.prevLinkId    = ipcOutVpssId;
+    ipcInVideoPrm.inQueParams.prevLinkQueId = 0;
+    ipcInVideoPrm.numOutQue                 = 1;
+    ipcInVideoPrm.outQueParams[0].nextLink  = encId;
+    ipcInVideoPrm.notifyNextLink            = TRUE;
+    ipcInVideoPrm.notifyPrevLink            = TRUE;
+    ipcInVideoPrm.noNotifyMode              = FALSE;
+
+    for (i=0; i<1; i++)
+    {
+        encPrm.chCreateParams[i].format 	= IVIDEO_H264HP;
+        encPrm.chCreateParams[i].profile	= IH264_HIGH_PROFILE;
+        encPrm.chCreateParams[i].dataLayout = IVIDEO_FIELD_SEPARATED;
+        if (TRUE)
+            encPrm.chCreateParams[i].fieldMergeEncodeEnable  = FALSE;
+        else
+            encPrm.chCreateParams[i].fieldMergeEncodeEnable  = TRUE;
+        encPrm.chCreateParams[i].maxBitRate = -1;
+        encPrm.chCreateParams[i].encodingPreset = 3;
+        encPrm.chCreateParams[i].rateControlPreset = 0;
+        encPrm.chCreateParams[i].enableHighSpeed = 0;
+        encPrm.chCreateParams[i].defaultDynamicParams.intraFrameInterval = 30;
+        encPrm.chCreateParams[i].encodingPreset = XDM_DEFAULT;
+        encPrm.chCreateParams[i].enableAnalyticinfo = 0;
+        encPrm.chCreateParams[i].enableWaterMarking = 0;
+        encPrm.chCreateParams[i].rateControlPreset =
+        IVIDEO_STORAGE;
+        encPrm.chCreateParams[i].defaultDynamicParams.inputFrameRate = 30;
+        encPrm.chCreateParams[i].defaultDynamicParams.targetBitRate = (2 * 1000 * 1000);
+        encPrm.chCreateParams[i].defaultDynamicParams.interFrameInterval = 1;
+        encPrm.chCreateParams[i].defaultDynamicParams.mvAccuracy =
+        IVIDENC2_MOTIONVECTOR_QUARTERPEL;
+        encPrm.chCreateParams[i].defaultDynamicParams.rcAlg = 0 ;
+        encPrm.chCreateParams[i].defaultDynamicParams.qpMin = 10;
+        encPrm.chCreateParams[i].defaultDynamicParams.qpMax = 40;
+        encPrm.chCreateParams[i].defaultDynamicParams.qpInit = -1;
+        encPrm.chCreateParams[i].defaultDynamicParams.vbrDuration = 8;
+        encPrm.chCreateParams[i].defaultDynamicParams.vbrSensitivity = 0;
+    }
+
+    encPrm.inQueParams.prevLinkId    = ipcInVideoId;
+    encPrm.inQueParams.prevLinkQueId = 0;
+    encPrm.outQueParams.nextLink     = ipcBitsOutVideoId;
+
+    ipcBitsOutVideoPrm.baseCreateParams.inQueParams.prevLinkId    = encId;
+    ipcBitsOutVideoPrm.baseCreateParams.inQueParams.prevLinkQueId = 0;
+    ipcBitsOutVideoPrm.baseCreateParams.numOutQue                 = 1;
+    ipcBitsOutVideoPrm.baseCreateParams.outQueParams[0].nextLink   = ipcBitsInHostId;
+    ipcBitsOutVideoPrm.baseCreateParams.notifyPrevLink = TRUE;
+    ipcBitsOutVideoPrm.baseCreateParams.notifyNextLink = FALSE;
+    ipcBitsOutVideoPrm.baseCreateParams.noNotifyMode = TRUE;
+
+    ipcBitsInHostPrm.baseCreateParams.inQueParams.prevLinkId = ipcBitsOutVideoId;
+    ipcBitsInHostPrm.baseCreateParams.inQueParams.prevLinkQueId = 0;
+    ipcBitsInHostPrm.cbCtx = ctx;
+    ipcBitsInHostPrm.cbFxn = bitsincallback;
+    ipcBitsInHostPrm.baseCreateParams.notifyNextLink = FALSE;
+    ipcBitsInHostPrm.baseCreateParams.notifyPrevLink = FALSE;
+
+    deiPrm.inQueParams.prevLinkId                        = dupId;
+    deiPrm.inQueParams.prevLinkQueId                     = 0;
+    deiPrm.outQueParams[DEI_LINK_OUT_QUE_DEI_SC].nextLink               = displayId;
+    deiPrm.enableOut[DEI_LINK_OUT_QUE_DEI_SC]               = TRUE;
+    deiPrm.enableOut[DEI_LINK_OUT_QUE_VIP_SC_SECONDARY_OUT] = FALSE;
+    deiPrm.enableOut[DEI_LINK_OUT_QUE_VIP_SC]               = FALSE;
+    deiPrm.tilerEnable                                   = FALSE;
+    deiPrm.comprEnable                                   = FALSE;
+    deiPrm.setVipScYuv422Format                          = FALSE;
+    if(videostd==DF_STD_1080I_60)
+        deiPrm.enableDeiForceBypass  = FALSE;
+    else
+        deiPrm.enableDeiForceBypass                      = TRUE;
+    deiPrm.enableLineSkipSc                              = FALSE;
+    deiPrm.outScaleFactor[DEI_LINK_OUT_QUE_DEI_SC][0].scaleMode = DEI_SCALE_MODE_RATIO;
+    deiPrm.outScaleFactor[DEI_LINK_OUT_QUE_DEI_SC][0].ratio.heightRatio.numerator   = 1;
+    deiPrm.outScaleFactor[DEI_LINK_OUT_QUE_DEI_SC][0].ratio.heightRatio.denominator = 1;
+    deiPrm.outScaleFactor[DEI_LINK_OUT_QUE_DEI_SC][0].ratio.widthRatio.numerator = 1;
+    deiPrm.outScaleFactor[DEI_LINK_OUT_QUE_DEI_SC][0].ratio.widthRatio.denominator = 1;
+    deiPrm.outScaleFactor[DEI_LINK_OUT_QUE_DEI_SC][0] = deiPrm.outScaleFactor[DEI_LINK_OUT_QUE_DEI_SC][0];
+    /* FPS rates of DEI queue connected to Display */
+    deiPrm.inputFrameRate[DEI_LINK_OUT_QUE_DEI_SC]  = 60;
+    deiPrm.outputFrameRate[DEI_LINK_OUT_QUE_DEI_SC] = 30;
+
+    displayPrm.inQueParams[0].prevLinkId	= deiId;
+    displayPrm.inQueParams[0].prevLinkQueId = 0;
+    displayPrm.displayRes				 = VSYS_STD_1080P_60;
+
+    UInt32 displayRes[SYSTEM_DC_MAX_VENC] =
+    {
+        VSYS_STD_1080P_60,   //SYSTEM_DC_VENC_HDMI,
+        VSYS_STD_1080P_60,    //SYSTEM_DC_VENC_HDCOMP,
+        VSYS_STD_1080P_60,    //SYSTEM_DC_VENC_DVO2
+        VSYS_STD_NTSC        //SYSTEM_DC_VENC_SD,
+    };
+
+    Chains_displayCtrlInit(displayRes);
+
+    printf("*************captureId**************\n");
+    System_linkCreate (captureId, &capturePrm, sizeof(capturePrm));
+    printf("*************dupId**************\n");
+    System_linkCreate(dupId, &dupPrm, sizeof(dupPrm));
+    printf("*************deiId**************\n");
+    System_linkCreate(deiId	 , &deiPrm, sizeof(deiPrm));
+    printf("*************ipcOutVpssId**************\n");
+    System_linkCreate(ipcOutVpssId , &ipcOutVpssPrm , sizeof(ipcOutVpssPrm) );
+    printf("*************ipcInVideoId**************\n");
+    System_linkCreate(ipcInVideoId , &ipcInVideoPrm , sizeof(ipcInVideoPrm) );
+    printf("*************encId**************\n");
+    System_linkCreate(encId, &encPrm, sizeof(encPrm));
+    printf("**************ipcBitsOutVideoId*************\n");
+    System_linkCreate(ipcBitsOutVideoId, &ipcBitsOutVideoPrm, sizeof(ipcBitsOutVideoPrm));
+    printf("************ipcBitsInHostId***************\n");
+    System_linkCreate(ipcBitsInHostId, &ipcBitsInHostPrm, sizeof(ipcBitsInHostPrm));
+    printf("**************displayId*************\n");
+    System_linkCreate(displayId, &displayPrm, sizeof(displayPrm));
+
+    ctx->captureId	= captureId;
+    ctx->displayId	= displayId;
+    ctx->dupId = dupId;
+    ctx->deiId = deiId;
+    ctx->ipcOutVpssId = ipcOutVpssId;
+    ctx->ipcInVideoId = ipcInVideoId;
+    ctx->encId = encId;
+    ctx->ipcBitsOutVideoId = ipcBitsOutVideoId;
+    ctx->ipcBitsInHostId = ipcBitsInHostId;
+
+    dframe_ipcBitsInitThrObj(ctx);
+    return ctx;
+}
+```
+bitsincallback发送信号量：  
+```c
+void bitsincallback(void *ctx)
+{
+    df_ctx *h = (df_ctx*)ctx;
+    OSA_printf("*********bits in callback called************\n");
+    OSA_semSignal(&h->bitsInSem);
+}
+```
+信号量触发dframe_ipcBitsRecvFxn函数进行视频流文件写入：  
+```c
+static Void *dframe_ipcBitsRecvFxn(Void * prm)
+{
+    df_ctx *ctx = ( df_ctx *) prm;
+    Int i,status;
+    Bitstream_BufList fullBufList;
+    Bitstream_Buf *pFullBuf;
+    Bitstream_Buf *pEmptyBuf;
+    Bitstream_BufList* pfullBufList=&fullBufList;
+
+    while (FALSE == ctx->exitBitsInThread)
+    {
+        OSA_semWait(&ctx->bitsInSem,OSA_TIMEOUT_FOREVER);
+        //if(ctx->getStart)
+        if(1)
+        {
+            pfullBufList->numBufs = 0;
+            IpcBitsInLink_getFullVideoBitStreamBufs(ctx->ipcBitsInHostId,pfullBufList);
+            if (pfullBufList->numBufs)
+            {
+                for (i = 0; i < pfullBufList->numBufs; i++)
+                {			
+                    pFullBuf = (fullBufList.bufs[i]);
+                    if(pFullBuf->fillLength)
+                    {
+                        fwrite(pFullBuf->addr,sizeof(char),pFullBuf->fillLength,ctx->fp);
+                    }
+                }
+                OSA_waitMsecs(DFRAME_SENDRECVFXN_PERIOD_MS);
+                IpcBitsInLink_putEmptyVideoBitStreamBufs(ctx->ipcBitsInHostId,pfullBufList);
+            }
+
+        }
+        else
+        {
+            pfullBufList->numBufs = 0;
+            IpcBitsInLink_getFullVideoBitStreamBufs(ctx->ipcBitsInHostId,pfullBufList);
+            if (pfullBufList->numBufs)
+            {
+                status =IpcBitsInLink_putEmptyVideoBitStreamBufs(ctx->ipcBitsInHostId,pfullBufList);
+            }
+        }
+        OSA_waitMsecs(DFRAME_SENDRECVFXN_PERIOD_MS);
+        OSA_printf("DFRAME:%s:Leaving...",__func__);
+    }
+    return NULL;
 }
 ```
