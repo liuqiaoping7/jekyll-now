@@ -27,14 +27,14 @@ Examples of properties of typical embedded computers when compared with general-
 #  3、环境搭建 #
 
 ##    3.1 设置环境变量包含交叉编译工具链路径 #
-    ruisu@ruisu:~/share$ sudo vi /etc/bash.bashrc
-    在文件末尾添加:
-    export PATH=$PATH:/home/ruisu/share/dvrrdk-rs8148/ti_tools/cgt_a8/arago/linux-devkit/bin
-    注：如果提示
-    /bin/sh: 1: /home/ruisu/share/dvrrdk-rs8148/dvr_rdk/../ti_tools/cgt_a8/arago/linux-devkit/bin/arm-arago-linux-gnueabi-gcc: not found
-    64位系统需要32位库支持：
-    ruisu@ruisu:~/share/dvrrdk-rs8148/dvr_rdk$ sudo apt-get install ia32-libs
-    再编译应该就没有问题了。
+ruisu@ruisu:~/share$ sudo vi /etc/bash.bashrc  
+在文件末尾添加:  
+export PATH=$PATH:/home/ruisu/share/dvrrdk-rs8148/ti_tools/cgt_a8/arago/linux-devkit/bin  
+注：如果提示  
+/bin/sh: 1: /home/ruisu/share/dvrrdk-rs8148/dvr_rdk/../ti_tools/cgt_a8/arago/linux-devkit/bin/arm-arago-linux-gnueabi-gcc: not found  
+64位系统需要32位库支持：  
+ruisu@ruisu:~/share/dvrrdk-rs8148/dvr_rdk$ sudo apt-get install ia32-libs  
+再编译应该就没有问题了。  
 
 ##    3.2 配置tftp服务 #
 安装tftp：
