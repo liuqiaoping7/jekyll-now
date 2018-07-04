@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Embedded system & Cross Compilation
+title: Embedded system & Cross Compilation & DaVinci Video Processors
 ---
 以下我们选取TI公司搭载DaVinci Video Processors的DM814x/AM387x EVM Baseboard为平台来讨论嵌入式系统、交叉编译环境的一些常识。
 
@@ -92,7 +92,7 @@ ruisu@ruisu:~/share/rootfs-avcap$ sudo service nfs-kernel-server restart
 ruisu@ruisu:~/share/rootfs-avcap$ sudo mount -t nfs 192.168.1.119:/home/ruisu/share/rootfs-avcap /mnt/share  
 
 ## 3.4 uboot启动参数 #
-以上PC服务都是为嵌入式系统启动准备的，下面我们把二者通过uboot关联起来。  
+以上PC服务都是为嵌入式系统启动准备的，二者通过uboot关联起来。  
 设定启动命令：  
 setenv bootcmd 'tftpboot 0x81000000 uImage_rs8148;bootm 0x81000000'。
 设定启动参数：  
