@@ -764,3 +764,152 @@ void* dframe_create(int outwidth, int outheight, int videostd,int argc, char **a
     return ctx;
 }
 ```
+dframe_ipcBitsInitThrObj函数创建信号量、buff队列、并建立新的线程，下面我们主要关注dframe_ipcBitsSendFxn。  
+```c
+static Void dframe_ipcBitsInitThrObj(df_ctx *thrObj)
+{
+    OSA_semCreate(&thrObj->bitsInSem,CHAINS_IPCBITS_MAX_PENDING_RECV_SEM_COUNT,0);
+    thrObj->exitBitsInThread = FALSE;
+    thrObj->exitBitsOutThread = FALSE;
+    OSA_queCreate(&thrObj->bufQFreeBufs,CHAINS_IPCBITS_FREE_QUE_MAX_LEN);
+    OSA_queCreate(&thrObj->bufQFullBufs,CHAINS_IPCBITS_FULL_QUE_MAX_LEN);
+    OSA_thrCreate(&thrObj->thrHandleBitsIn,
+                            dframe_ipcBitsSendFxn,
+                            CHAINS_IPCBITS_RECVFXN_TSK_PRI,
+                            CHAINS_IPCBITS_RECVFXN_TSK_STACK_SIZE,
+                            thrObj);
+}
+```
+dframe_ipcBitsSendFxn这个新的线程循环体中IpcBitsOutLink_getEmptyVideoBitStreamBufs 与 IpcBitsOutLink_putFullVideoBitStreamBufs 构成一对，
+将 dframe_read_frame_h264 从文件中读入的视频流输入到 ipcBitsOutHostId 对应的syslink中，现在你应该知道了视频流的来龙去脉了吧。
+下面我们来分析关键的 dframe_read_frame_h264函数。
+```c
+static Void *dframe_ipcBitsSendFxn(Void * prm)
+{
+    df_ctx *thrObj = ( df_ctx *) prm;
+    Int i,status;
+    Bitstream_BufList emptyBufList;
+    Bitstream_Buf *pBuf;
+    UInt32 bitBufSize,framesize;
+    IpcBitsOutLinkHLOS_BitstreamBufReqInfo reqInfo;
+
+    char *framebuf=(char *)malloc(FRAME_BUFFER_LEN*sizeof(char));
+    if(framebuf==NULL)return NULL;
+    memset(framebuf,0,FRAME_BUFFER_LEN*sizeof(char));
+    while (FALSE == thrObj->exitBitsOutThread)
+    {
+        OSA_waitMsecs(DFRAME_SENDRECVFXN_PERIOD_MS);
+        bitBufSize = CHAINS_IPCBITS_GET_BITBUF_SIZE(CHAINS_IPCBITS_DEFAULT_WIDTH, CHAINS_IPCBITS_DEFAULT_HEIGHT);
+        emptyBufList.numBufs = 0;
+        reqInfo.numBufs = VIDBITSTREAM_MAX_BITSTREAM_BUFS;
+        reqInfo.reqType = IPC_BITSOUTHLOS_BITBUFREQTYPE_BUFSIZE;
+        for (i = 0; i < VIDBITSTREAM_MAX_BITSTREAM_BUFS; i++)
+        {
+            reqInfo.u[i].minBufSize = bitBufSize;
+        }
+        IpcBitsOutLink_getEmptyVideoBitStreamBufs(thrObj->ipcBitsOutHostId,&emptyBufList,&reqInfo);
+        if (emptyBufList.numBufs)
+        {
+            OSA_printf("DFRAME:%s:***********getbufs******************",__func__);
+            for (i = 0; i < emptyBufList.numBufs;)
+            {
+                pBuf = emptyBufList.bufs[i];
+                pBuf->channelNum = 0;
+                pBuf->codingType = 0;
+                pBuf->fillLength = 0;
+                pBuf->isKeyFrame = 0;
+                pBuf->timeStamp  = 0;
+                pBuf->mvDataFilledSize = 0;
+                pBuf->bottomFieldBitBufSize = 0;
+                pBuf->inputFileChanged = 0;
+                framesize=0;
+                framesize =dframe_read_frame_h264(thrObj->fp,framebuf);
+                if(framesize==-1)break;
+                if(framesize!=-1 && framesize){
+                    memcpy(pBuf->addr, framebuf, framesize);
+                    pBuf->fillLength=framesize;
+                    printf("framesize:***********%d******************",framesize);
+                    i++;
+                }
+            }
+            IpcBitsOutLink_putFullVideoBitStreamBufs(thrObj->ipcBitsOutHostId,&emptyBufList);
+        }
+    }
+    free(framebuf);
+    OSA_printf("DFRAME:%s:Leaving...",__func__);
+    return NULL;
+}
+```
+视频文件存储是对应一帧帧的图像的，唯一不同的是采用了各式各样的压缩技术。 从 dframe_read_frame_h264 函数你可以领略到其中的意味。
+```c
+#define DFRAME_FRAMEPOOL_TBL_SIZE                            (128)
+#define DFRAME_FRAMEPOOL_INVALIDID                           (~0u)
+#define BUFFER_READ_LEN         (512)
+#define FRAME_BUFFER_LEN         (1920*1280/2)
+enum H264NALTYPE{
+    H264NT_NAL = 0,
+    H264NT_SLICE,       /*1, p帧*/
+    H264NT_SLICE_DPA,   /*2*/
+    H264NT_SLICE_DPB,   /*3*/
+    H264NT_SLICE_DPC,   /*4*/
+    H264NT_SLICE_IDR,   /*5, I帧*/
+    H264NT_SEI,         /*6, SEI*/
+    H264NT_SPS,         /*7, SPS, sequence parameter set*/
+    H264NT_PPS,         /*8, PPS, Piture parameter set*/
+    H264NT_SINGLE_PKT = 100,
+};
+
+static int dframe_read_frame_h264(FILE* fp,char * dest)
+{
+    int rlen = 0, offset = 0, frm_step = 0;
+    int i;
+    char rcvbuf[BUFFER_READ_LEN];
+    rlen = fread (rcvbuf,1,BUFFER_READ_LEN,fp);
+    if(rlen < 0)return -1;
+    while(rlen > 0)
+    {
+        for(i=0; i<(rlen-5); i++)
+        {
+            if((rcvbuf[i]==0) && (rcvbuf[i+1]==0) && (rcvbuf[i+2]==0) && (rcvbuf[i+3]==1)){
+                if((rcvbuf[i+4]&0x1f) == H264NT_SLICE){
+                    frm_step++;
+                    if(frm_step == 2)break;
+                }
+                else if((rcvbuf[i+4]&0x1f) == H264NT_SLICE_IDR){
+                    ;
+                }
+                else if((rcvbuf[i+4]&0x1f) == H264NT_SPS){
+                    frm_step++;
+                    if(frm_step == 2)break;
+                }
+                else if((rcvbuf[i+4]&0x1f) == H264NT_PPS){
+                    ;
+                }
+            }
+        }//the end of the file
+        if(i == 0)
+        {
+            memcpy(dest+offset, rcvbuf, rlen);
+            offset += rlen;
+        }
+        else
+        {
+            memcpy(dest+offset, rcvbuf, i);
+            offset += i;
+            fseek(fp, i-rlen, SEEK_CUR);
+        }
+        if(frm_step == 2)
+        {
+            break;
+        }
+        /*for next loop*/
+        rlen = fread (rcvbuf,1,BUFFER_READ_LEN,fp);
+        if(rlen < 0)return -1;
+    }
+    if((frm_step == 1 && rlen == 0) || (frm_step == 2))
+    {
+        return offset;
+    }
+    return -1;        
+}
+```
