@@ -91,6 +91,13 @@ ruisu@ruisu:~/share/rootfs-avcap$ sudo service nfs-kernel-server restart
 测试本机能否挂载成功：  
 ruisu@ruisu:~/share/rootfs-avcap$ sudo mount -t nfs 192.168.1.119:/home/ruisu/share/rootfs-avcap /mnt/share  
 
+## 3.4 uboot启动参数 #
+以上PC服务都是为嵌入式系统启动准备的，下面我们把二者通过uboot关联起来。  
+设定启动命令：  
+setenv bootcmd 'tftpboot 0x81000000 uImage_rs8148;bootm 0x81000000'。
+设定启动参数：  
+setenv bootargs 'console=ttyO0,115200n8 noinitrd ip=dhcp root=/dev/nfs nfsroot=192.168.1.119:/home/ruisu/share/rootfs-avcap,nolock rw mem=384M vram=128M ti814xfb.vram=0:120M,1:4M,2:4M notifyk.vpssm3_sva=0xafd00000'。
+注：以上uImage_rs8148为linux内核映像，务必位于host tftp目录下，/home/ruisu/rootfs-avcap为host nfs。
 
 #  4、二次开发 #
 ## 4.1、H264编码视频流写入文件，即录像功能 #  
@@ -504,7 +511,7 @@ void bitsincallback(void *ctx)
     OSA_semSignal(&h->bitsInSem);
 }
 ```
-信号量触发dframe_ipcBitsRecvFxn函数进行视频流文件写入：  
+信号量触发dframe_ipcBitsRecvFxn函数进行视频流文件写入。 IpcBitsInLink_getFullVideoBitStreamBufs 与  IpcBitsInLink_putEmptyVideoBitStreamBufs 成对不断从syslink中获取视频流buff数据。
 ```c
 static Void *dframe_ipcBitsRecvFxn(Void * prm)
 {
@@ -837,7 +844,7 @@ static Void *dframe_ipcBitsSendFxn(Void * prm)
     return NULL;
 }
 ```
-视频文件存储是对应一帧帧的图像的，唯一不同的是采用了各式各样的压缩技术。 从 dframe_read_frame_h264 函数你可以领略到其中的意味。下面我们来分析关键的 dframe_read_frame_h264 函数。
+视频文件存储是对应一帧帧的图像的，唯一不同的是采用了各式各样的压缩技术。 从 dframe_read_frame_h264 函数你可以领略到其中的意味。下面我们来看看关键的 dframe_read_frame_h264 函数。
 ```c
 #define DFRAME_FRAMEPOOL_TBL_SIZE                            (128)
 #define DFRAME_FRAMEPOOL_INVALIDID                           (~0u)
