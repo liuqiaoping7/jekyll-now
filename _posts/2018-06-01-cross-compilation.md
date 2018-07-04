@@ -511,7 +511,7 @@ void bitsincallback(void *ctx)
     OSA_semSignal(&h->bitsInSem);
 }
 ```
-信号量触发dframe_ipcBitsRecvFxn函数进行视频流文件写入。 IpcBitsInLink_getFullVideoBitStreamBufs 与  IpcBitsInLink_putEmptyVideoBitStreamBufs 成对不断从syslink中获取视频流buff数据。
+IpcBitsInLink_getFullVideoBitStreamBufs 与 IpcBitsInLink_putEmptyVideoBitStreamBufs 成对不断从syslink中获取视频流buff数据。信号量触发dframe_ipcBitsRecvFxn函数进行视频流文件写入。
 ```c
 static Void *dframe_ipcBitsRecvFxn(Void * prm)
 {
@@ -594,7 +594,7 @@ int main ( int argc, char **argv )
     return (0);
 }
 ```
-dframe_create 函数，构建syslink可以参考TI官方资料。这里着重说明如何将文件中的视频流导入，我们主要关注 dframe_ipcBitsInitThrObj(ctx)。
+dframe_create 函数，构建syslink可以参考TI官方资料。这里着重说明如何将文件中的视频流导入，主要关注 dframe_ipcBitsInitThrObj函数。
 ```c
 void* dframe_create(int outwidth, int outheight, int videostd,int argc, char **argv)
 {
@@ -769,7 +769,7 @@ void* dframe_create(int outwidth, int outheight, int videostd,int argc, char **a
     return ctx;
 }
 ```
-dframe_ipcBitsInitThrObj函数创建信号量、buff队列、并建立新的线程，我们主要关注dframe_ipcBitsSendFxn。  
+dframe_ipcBitsInitThrObj函数创建信号量、buff队列、并建立新的线程。主要关注dframe_ipcBitsSendFxn。  
 ```c
 static Void dframe_ipcBitsInitThrObj(df_ctx *thrObj)
 {
@@ -785,7 +785,7 @@ static Void dframe_ipcBitsInitThrObj(df_ctx *thrObj)
                             thrObj);
 }
 ```
-dframe_ipcBitsSendFxn这个新的线程循环体中IpcBitsOutLink_getEmptyVideoBitStreamBufs 与 IpcBitsOutLink_putFullVideoBitStreamBufs 构成一对，
+dframe_ipcBitsSendFxn新线程循环体中 IpcBitsOutLink_getEmptyVideoBitStreamBufs 与 IpcBitsOutLink_putFullVideoBitStreamBufs 构成一对，
 将 dframe_read_frame_h264 从文件中读入的视频流输入到 ipcBitsOutHostId 对应的syslink中，现在视频流的来龙去脉一目了然。
 ```c
 static Void *dframe_ipcBitsSendFxn(Void * prm)
@@ -844,7 +844,7 @@ static Void *dframe_ipcBitsSendFxn(Void * prm)
     return NULL;
 }
 ```
-视频文件存储是对应一帧帧的图像的，唯一不同的是采用了各式各样的压缩技术。 从 dframe_read_frame_h264 函数你可以领略到其中的意味。下面我们来看看关键的 dframe_read_frame_h264 函数。
+视频文件存储对应一帧帧的图像，唯一不同的是采用了各式各样的压缩技术。 从 dframe_read_frame_h264 函数可以领略到其中的意味，来看看这个函数：
 ```c
 #define DFRAME_FRAMEPOOL_TBL_SIZE                            (128)
 #define DFRAME_FRAMEPOOL_INVALIDID                           (~0u)
