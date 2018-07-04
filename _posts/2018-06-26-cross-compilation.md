@@ -79,17 +79,17 @@ xinetd start/running, process 5159
 ruisu@ruisu:~/share$ tftp 127.0.0.1 ，能在非tftp目录下下载文件即为成功。  
 
 ##    3.3 配置nfs服务 #
-安装nfs服务器端：
-ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo apt-get install nfs-kernel-server
-设置NFS-Server目录：
-ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo vi /etc/exports
- 添加
-/home/ruisu/share/rootfs-avcap    \*(rw,sync,no_subtree_check,no_root_squash)
-重启portmap（如果有必要）和nfs-kernel-server服务：
-ruisu@ruisu:~/share/rootfs-avcap$ sudo service portmap restart
-ruisu@ruisu:~/share/rootfs-avcap$ sudo service nfs-kernel-server restart
-测试本机能否挂载成功：
-ruisu@ruisu:~/share/rootfs-avcap$ sudo mount -t nfs 192.168.1.119:/home/ruisu/share/rootfs-avcap /mnt/share
+安装nfs服务器端：  
+ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo apt-get install nfs-kernel-server  
+设置NFS-Server目录：  
+ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo vi /etc/exports  
+ 添加  
+/home/ruisu/share/rootfs-avcap    \*(rw,sync,no_subtree_check,no_root_squash)  
+重启portmap（如果有必要）和nfs-kernel-server服务：  
+ruisu@ruisu:~/share/rootfs-avcap$ sudo service portmap restart  
+ruisu@ruisu:~/share/rootfs-avcap$ sudo service nfs-kernel-server restart  
+测试本机能否挂载成功：  
+ruisu@ruisu:~/share/rootfs-avcap$ sudo mount -t nfs 192.168.1.119:/home/ruisu/share/rootfs-avcap /mnt/share  
 
 
 #  4、二次开发 #
