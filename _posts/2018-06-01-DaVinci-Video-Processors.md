@@ -27,24 +27,24 @@ Examples of properties of typical embedded computers when compared with general-
 #  3、环境搭建 #
 
 ##    3.1 设置环境变量包含交叉编译工具链路径 #
-ruisu@ruisu:~/share$ sudo vi /etc/bash.bashrc  
+qiao@qiao:~/share$ sudo vi /etc/bash.bashrc  
 在文件末尾添加:  
-export PATH=$PATH:/home/ruisu/share/dvrrdk-rs8148/ti_tools/cgt_a8/arago/linux-devkit/bin  
+export PATH=$PATH:/home/qiao/share/dvrrdk-rs8148/ti_tools/cgt_a8/arago/linux-devkit/bin  
 注：如果提示  
-/bin/sh: 1: /home/ruisu/share/dvrrdk-rs8148/dvr_rdk/../ti_tools/cgt_a8/arago/linux-devkit/bin/arm-arago-linux-gnueabi-gcc: not found  
+/bin/sh: 1: /home/qiao/share/dvrrdk-rs8148/dvr_rdk/../ti_tools/cgt_a8/arago/linux-devkit/bin/arm-arago-linux-gnueabi-gcc: not found  
 64位系统需要32位库支持：  
-ruisu@ruisu:~/share/dvrrdk-rs8148/dvr_rdk$ sudo apt-get install ia32-libs  
+qiao@qiao:~/share/dvrrdk-rs8148/dvr_rdk$ sudo apt-get install ia32-libs  
 再编译应该就没有问题了。  
 
 ##    3.2 配置tftp服务 #
 安装tftp：
-ruisu@ruisu:~/share$ sudo apt-get install tftp-hpa tftpd-hpa xinetd  
+qiao@qiao:~/share$ sudo apt-get install tftp-hpa tftpd-hpa xinetd  
 这里tftpd为服务端tftp为客户端(可以用于测试服务端是否成功)。  
 创建tftp目录：  
-ruisu@ruisu:~/share$ mkdir tftproot  
-ruisu@ruisu:~/share$ chmod 777 tftproot  
+qiao@qiao:~/share$ mkdir tftproot  
+qiao@qiao:~/share$ chmod 777 tftproot  
 修改tftp配置文件，如果没有就创建：  
-ruisu@ruisu:~/share$ sudo vi /etc/xinetd.d/tftp  
+qiao@qiao:~/share$ sudo vi /etc/xinetd.d/tftp  
 添加  
 service tftp  
          {  
@@ -52,52 +52,52 @@ service tftp
              socket_type     = dgram  
              protocol        = udp  
              wait            = yes  
-             user            = ruisu  
+             user            = qiao  
              server          = /usr/sbin/in.tftpd  
-             server_args     = -s /home/ruisu/share/tftproot  
+             server_args     = -s /home/qiao/share/tftproot  
              source          = 11  
              cps             = 100 2   
              flags =IPv4  
          }  
-ruisu@ruisu:~/share$ sudo vi /etc/inetd.conf  
+qiao@qiao:~/share$ sudo vi /etc/inetd.conf  
 添加  
 tftp	dgram	udp	wait	nobody		/usr/sbin/tcpd  
-/usr/sbin/in.tftpd	/home/ruisu/share/tftproot  
-ruisu@ruisu:~/share$ sudo vi /etc/default/tftpd-hpa  
+/usr/sbin/in.tftpd	/home/qiao/share/tftproot  
+qiao@qiao:~/share$ sudo vi /etc/default/tftpd-hpa  
 改为  
 #RUN_DAEMON="no"  
-#OPTIONS="-s /home/ruisu/share/tftproot -c -p -U tftpd"  
+#OPTIONS="-s /home/qiao/share/tftproot -c -p -U tftpd"  
 TFTP_USERNAME="tftp"  
-TFTP_DIRECTORY="/home/ruisu/share/tftproot"  
+TFTP_DIRECTORY="/home/qiao/share/tftproot"  
 TFTP_ADDRESS="0.0.0.0:69"  
 TFTP_OPTIONS="-l -c -s"  
 重启tftp服务：  
-ruisu@ruisu:~/share$ sudo service xinetd restart  
+qiao@qiao:~/share$ sudo service xinetd restart  
 xinetd stop/waiting  
 xinetd start/running, process 5159  
 测试一下 tftp服务：  
-ruisu@ruisu:~/share$ tftp 127.0.0.1 ，能在非tftp目录下下载文件即为成功。  
+qiao@qiao:~/share$ tftp 127.0.0.1 ，能在非tftp目录下下载文件即为成功。  
 
 ##    3.3 配置nfs服务 #
 安装nfs服务器端：  
-ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo apt-get install nfs-kernel-server  
+qiao@qiao:~/share/tftproot/rootfs-avcap$ sudo apt-get install nfs-kernel-server  
 设置NFS-Server目录：  
-ruisu@ruisu:~/share/tftproot/rootfs-avcap$ sudo vi /etc/exports  
+qiao@qiao:~/share/tftproot/rootfs-avcap$ sudo vi /etc/exports  
  添加  
-/home/ruisu/share/rootfs-avcap    \*(rw,sync,no_subtree_check,no_root_squash)  
+/home/qiao/share/rootfs-avcap    \*(rw,sync,no_subtree_check,no_root_squash)  
 重启portmap（如果有必要）和nfs-kernel-server服务：  
-ruisu@ruisu:~/share/rootfs-avcap$ sudo service portmap restart  
-ruisu@ruisu:~/share/rootfs-avcap$ sudo service nfs-kernel-server restart  
+qiao@qiao:~/share/rootfs-avcap$ sudo service portmap restart  
+qiao@qiao:~/share/rootfs-avcap$ sudo service nfs-kernel-server restart  
 测试本机能否挂载成功：  
-ruisu@ruisu:~/share/rootfs-avcap$ sudo mount -t nfs 192.168.1.119:/home/ruisu/share/rootfs-avcap /mnt/share  
+qiao@qiao:~/share/rootfs-avcap$ sudo mount -t nfs 192.168.1.119:/home/qiao/share/rootfs-avcap /mnt/share  
 
 ## 3.4 uboot启动参数 #
 以上PC服务都是为嵌入式系统启动准备的，二者通过uboot关联起来。  
 设定启动命令：  
 setenv bootcmd 'tftpboot 0x81000000 uImage_rs8148;bootm 0x81000000'。  
 设定启动参数：  
-setenv bootargs 'console=ttyO0,115200n8 noinitrd ip=dhcp root=/dev/nfs nfsroot=192.168.1.119:/home/ruisu/share/rootfs-avcap,nolock rw mem=384M vram=128M ti814xfb.vram=0:120M,1:4M,2:4M notifyk.vpssm3_sva=0xafd00000'。  
-注：以上uImage_rs8148为linux内核映像，务必位于host tftp目录下，/home/ruisu/rootfs-avcap为host nfs。  
+setenv bootargs 'console=ttyO0,115200n8 noinitrd ip=dhcp root=/dev/nfs nfsroot=192.168.1.119:/home/qiao/share/rootfs-avcap,nolock rw mem=384M vram=128M ti814xfb.vram=0:120M,1:4M,2:4M notifyk.vpssm3_sva=0xafd00000'。  
+注：以上uImage_rs8148为linux内核映像，务必位于host tftp目录下，/home/qiao/rootfs-avcap为host nfs。  
 
 #  4、二次开发 #
 ## 4.1、H264编码视频流写入文件，即录像功能 #  
