@@ -122,6 +122,38 @@ energy detection and are refined using cyclostationary estimators.
 \#    |    %23
 &     |    %26  
 
+<table>
+        <tr>
+            <th>原字符</th>
+            <th>转义编码</th>
+        </tr>
+        <tr>
+            <th>+</th>
+            <th>%2B</th>
+        </tr>
+        <tr>
+            <th>?</th>
+            <th>%3F</th>
+        </tr>
+        <tr>
+            <th>%</th>
+            <th>%25</th>
+        </tr>
+        <tr>
+            <th>#</th>
+            <th>%23</th>
+        </tr>
+        <tr>
+            <th>&</th>
+            <th>%26</th>
+        </tr>
+</table>
+
+作者：Gaolex
+链接：https://www.jianshu.com/p/abaff828100d
+來源：简书
+简书著作权归作者所有，任何形式的转载都请联系作者获得授权并注明出处。
+
 这里注意转义编码需要避免**重复转义**，在这里就是'%'要最先转。代码如下：
 ```python
 import pyperclip
