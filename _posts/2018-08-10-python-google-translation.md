@@ -4,7 +4,8 @@ title: Python应用-判断单词-合并换行-自动Google翻译文献
 ---
 
 #  1、背景 #
-研究生要写出好一点的论文，必然是要看许多的文献。当我们看外文文献，Google翻译就是个好帮手。即便如此，这其中依然少不了折腾。
+研究生要写出好一点的论文，必然是要看许多的文献。当我们看外文文献，Google翻译就是个好帮手。即便如此，这其中依然少不了折腾。  
+
 通常我们看到的论文是这样的：  
 
 ![image01](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img01.png)  
@@ -15,11 +16,10 @@ title: Python应用-判断单词-合并换行-自动Google翻译文献
 
 #  2、循序渐进 #
 ##    2.1 原始 #
-问题罪魁祸首是PDF论文复制出来的换行符号。这还不简单，逐个删除换行符号就行了？  
+问题罪魁祸首是PDF论文复制出来的换行符号。这还不简单，逐个删除换行符号就行了？可以看到翻译结果明显准确了！可是重复的事情做多了，大概你也就烦了。  
 
 ![image03](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img03.png)  
 
-可以看到翻译结果明显准确了！可是重复的事情做多了，大概你也就烦了。
 ##    2.2 石器 #
 重复性的工作嘛，机器是最乐意的了。最容易想到的是：复制到一个文本编辑器里，查找全局替换就好了。  
 
@@ -29,7 +29,7 @@ title: Python应用-判断单词-合并换行-自动Google翻译文献
 
 ![image04](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img04.png)  
 
-罪魁祸首显形了\r\n：  
+罪魁祸首'\r\n'显形了：  
 
 ![image05](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img05.png)  
 
@@ -38,13 +38,13 @@ title: Python应用-判断单词-合并换行-自动Google翻译文献
 ![image06](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img06.png)  
 
 ##    2.3 铁器 #
-接来下我们来个跳跃，自己生产自己的工具，让更好的工具来替我们*替换*好了，步骤如下：  
+接来下文明大跃进，我们自己生产工具，这个工具就是--**Python脚本**，让他帮我们完成*替换*，步骤如下：  
 
-+我们从PDF按下Ctrl+C
-+工具替换粘贴板文本里的\r\n
-+我们粘贴到Google翻译  
++ 我们从PDF按下Ctrl+C
++ 工具替换粘贴板文本里的''\r\n'
++ 我们粘贴到Google翻译  
 
-我们的这个工具可以是Python脚本，由他定时监视我们的粘贴板：
+Python脚本定时监视粘贴板：
 ```python
 import pyperclip
 import time
@@ -70,9 +70,9 @@ def altercopy():
 使用过林格斯词典大多体验过这个功能：选中内容后词典会自动弹出翻译结果来。我们要求不高，当我复制了内容之后是否可以为我们弹出Google翻译结果呢？  
 
 模拟步骤如下：  
-+我们从PDF按下Ctrl+C
-+工具替换粘贴板文本里的\r\n
-+工具打开浏览器，访问Goolge翻译网页翻译粘贴板文本  
++ 我们从PDF按下Ctrl+C
++ 工具替换粘贴板文本里的\r\n
++ 工具打开浏览器，访问Goolge翻译网页翻译粘贴板文本  
 
 这里我们需要了解一下url的常识，不过我们暂且不深究。在浏览器上翻译hello看看就明白了。  
 
@@ -112,11 +112,11 @@ energy detection and are refined using cyclostationary estimators.
 ![image08](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img08.png)  
 
 明眼人一看就明白了翻译内容 '/' 和后面的内容都没有出现在Google翻译框中！这其实就是因为url的规则。多的不啰嗦，大家伙看看url编码就知道了。我们解决这个问题就需要**特殊字符转义编码** ：
--  +     %2B
--  ?     %3F
--  %    %25
--  #     %23
--  &    %26  
++ +    %2B
++ ?    %3F
++ %  %25
++ #    %23
++ &   %26  
 
 这里注意转义编码需要避免**重复转义**，在这里就是'%'需要先转，代码如下：
 ```python
