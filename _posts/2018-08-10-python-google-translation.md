@@ -15,12 +15,12 @@ title: Python应用-判断单词-合并换行-自动Google翻译文献
 ![image02](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img02.png)  
 
 #  2、逐步改进 #
-##    2.1 原始 #
+##    2.1 原始时代 #
 罪魁祸首是PDF论文的换行。手工逐个删除换行符，可以看到翻译结果明显准确了！只是重复的事情做多了也烦人！  
 
 ![image03](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img03.png)  
 
-##    2.2 石器 #
+##    2.2 石器时代 #
 重复性的工作，机器最胜任了。最容易想到的办法：把文本复制到编辑器里，查找全局替换就好了。  
 
 以atom编辑器为例：  
@@ -37,7 +37,7 @@ title: Python应用-判断单词-合并换行-自动Google翻译文献
 
 ![image06](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img06.png)  
 
-##    2.3 铁器 #
+##    2.3 铁器时代 #
 接来下文明大跃进，我们自己生产工具，这个工具就是--**Python脚本**，让他帮我们完成*替换*，步骤如下：  
 
 + 手动从PDF复制文本
@@ -66,7 +66,7 @@ def altercopy():
 ```
 至此省心了些。只要从PDF文献复制文本，等待一会粘贴到Google翻译框中，粘贴出的已经自动合并换行了。  
 
-##    2.4 蒸汽 #
+##    2.4 蒸汽时代 #
 使用过林格斯词典大多体验过这个功能：选中内容后词典会自动弹出翻译结果。类似的我们可以实现，复制了文本之后自动弹出Google翻译结果。  
 
 模拟步骤如下：  
@@ -113,6 +113,7 @@ energy detection and are refined using cyclostationary estimators.
 ![image08](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img08.png)  
 
 显然文本中 '/' 和后面的内容都没有出现在Google翻译框中！这其实是url的规则把'/'当做解析字符处理了。解决这个问题需要**特殊字符转义编码** ：
+
 | 原字符 | 转义编码 |
 | --- | --- |
 | \+ | %2B |
@@ -149,7 +150,7 @@ def translation():
             webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(chrome_path))
             webbrowser.get('chrome').open(url)
 ```
-##    2.5 电气自动 #
+##    2.5 电气自动化时代 #
 以上我们只是机械地把*换行*替换为*空格*，有时候不仅有词间换行，也会有断字换行的情况，此时正确的处理应该是把*换行*替换为*空字符*。这里关键在于判断是否断字，等价于判断单词是否有效。这里我们大材小用一下 **Natural language toolkit (NLTK)** 。
 ```python
 import pyperclip
@@ -203,4 +204,6 @@ def translation():
 ![image11](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img11.png)  
 
 #  3、感想 #
-Python对字符串等序列的操作极其简明；各方面应用的支持库非常丰富。对于编程者构建实时性要求不高的日常辅助工具非常方便快捷。本例完整脚本代码可从[auto_google_translation](https://github.com/liuqiaoping7/auto_google_translation)fork或download。
+Python对字符串等序列的操作极其简明；各方面应用的支持库非常丰富。对于编程者构建实时性要求不高的日常辅助工具非常方便快捷。
+
+本例完整脚本代码可从[auto_google_translation](https://github.com/liuqiaoping7/auto_google_translation)fork或download。
