@@ -120,13 +120,7 @@ energy detection and are refined using cyclostationary estimators.
 |     ?     |    %3F     |
 |    %    |    %25    |
 |    \#    |    %23    |
-|    &     |    %26    |
-
-| 水果        | 价格    |  数量  |
-| --------   | -----:   | :----: |
-| 香蕉        | $1      |   5    |
-| 苹果        | $1      |   6    |
-| 草莓        | $1      |   7    |
+|    &     |    %26    |  
 
 作者：Gaolex
 链接：https://www.jianshu.com/p/abaff828100d
