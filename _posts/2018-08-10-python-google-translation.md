@@ -202,4 +202,4 @@ def translation():
 ![image11](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img11.png)  
 
 #  3、感想 #
-Python这门工具语言，对于字符串等序列操作极其简明，各方面支持库也非常丰富。日常数据处理极其便利，对于不同场景需求应该多加应用！本例完整脚本代码可从[我的github工程](https://github.com/liuqiaoping7/auto_google_translation)fork或者download。
+Python这门工具语言，对于字符串等序列操作极其简明，各方面支持库也非常丰富。日常数据处理极其便利，对于不同场景需求应该多加应用！本例完整脚本代码可从[auto_google_translation](https://github.com/liuqiaoping7/auto_google_translation)fork或者download。
