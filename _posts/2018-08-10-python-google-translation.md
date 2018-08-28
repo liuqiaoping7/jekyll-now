@@ -112,13 +112,13 @@ energy detection and are refined using cyclostationary estimators.
 ![image08](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img08.png)  
 
 明显的文本中 '/' 和后面的内容都没有出现在Google翻译框中！这其实是url的规则把'/'当做解析字符处理了。解决这个问题就需要**特殊字符转义编码** ：
-原字符 | 转义编码
---- | ---
-\+ | %2B
-? | %3F
-% | %25
-\# | %23
-& | %26
+| 原字符 | 转义编码 |
+| --- | --- |
+| \+ | %2B |
+| ? | %3F |
+| % | %25 |
+| \# | %23 |
+| & | %26 |
 
 这里注意转义编码需要避免**重复转义**，在这里就是'%'需要先转。代码如下：
 ```python
