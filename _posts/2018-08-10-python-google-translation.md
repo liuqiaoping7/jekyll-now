@@ -7,17 +7,17 @@ title: Python应用-判断单词-合并换行-自动Google翻译文献
 研究生要写出好一点的论文，必然是要看许多的文献。当我们看外文文献，Google翻译就是个好帮手。即便如此，这其中依然少不了折腾。
 通常我们看到的论文是这样的：  
 
-![image01](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img01.jpg)  
+![image01](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img01.png)  
 
 复制出来的文字粘贴到Google翻译结果是这样的：  
 
-![image02](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img02.jpg)  
+![image02](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img02.png)  
 
 #  2、循序渐进 #
 ##    2.1 原始 #
 问题罪魁祸首是PDF论文复制出来的换行符号。这还不简单，逐个删除换行符号就行了？  
 
-![image03](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img03.jpg)  
+![image03](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img03.png)  
 
 可以看到翻译结果明显准确了！可是重复的事情做多了，大概你也就烦了。
 ##    2.2 石器 #
@@ -27,15 +27,15 @@ title: Python应用-判断单词-合并换行-自动Google翻译文献
 
 先要知道替换对象是什么，我们设置atom显示空白字符：  
 
-![image04](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img04.jpg)  
+![image04](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img04.png)  
 
 罪魁祸首显形了\r\n：  
 
-![image05](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img05.jpg)  
+![image05](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img05.png)  
 
 使用全局替换，这里注意必须使用**正则表达式**才能替换：  
 
-![image06](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img06.jpg)  
+![image06](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img06.png)  
 
 ##    2.3 铁器 #
 接来下我们来个跳跃，自己生产自己的工具，让更好的工具来替我们*替换*好了，步骤如下：  
@@ -78,7 +78,7 @@ def altercopy():
 
 直观的就是 https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/ + 'hello'。也就是访问[hello](https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/hello)  
 
-![image07](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img07.jpg)
+![image07](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img07.png)
 ```python
 import pyperclip
 import time
@@ -109,7 +109,7 @@ energy detection and are refined using cyclostationary estimators.
 
 意外的得到了：  
 
-![image08](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img08.jpg)  
+![image08](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img08.png)  
 
 明眼人一看就明白了翻译内容 '/' 和后面的内容都没有出现在Google翻译框中！这其实就是因为url的规则。多的不啰嗦，大家伙看看url编码就知道了。我们解决这个问题就需要**特殊字符转义编码** ：
 -  +     %2B
@@ -189,15 +189,15 @@ def translation():
 运行示例：
 选择Ctrl+C:  
 
-![image09](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img09.jpg)  
+![image09](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img09.png)  
 
 启动脚本和输出：  
 
-![image10](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img10.jpg)  
+![image10](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img10.png)  
 
 自动打开网页翻译内容：  
 
-![image11](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img11.jpg)  
+![image11](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img11.png)  
 
 #  3、感想 #
 Python这门工具语言，对于字符串等序列操作极其简明，各方面支持库也非常丰富。日常数据处理极其便利，对于不同场景需求应该多加应用！本例完整脚本代码可从[我的github工程](https://github.com/liuqiaoping7/auto_google_translation)fork或者download。
