@@ -3,9 +3,9 @@ layout: post
 title: Python应用-判断单词-合并换行-自动Google翻译文献
 ---
 
-#  1、背景 #
 研究生要写出好一点的论文，必然是要看许多的文献。当我们看外文文献，Google翻译就是个好帮手。即便如此，这其中依然少不了折腾。  
 
+#  1、背景 #
 通常我们看到的论文是这样的：  
 
 ![image01](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img01.png)  
