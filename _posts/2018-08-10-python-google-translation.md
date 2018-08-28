@@ -122,6 +122,17 @@ energy detection and are refined using cyclostationary estimators.
 |    \#    |    %23    |
 |    &     |    %26    |
 
+| 水果        | 价格    |  数量  |
+| --------   | -----:   | :----: |
+| 香蕉        | $1      |   5    |
+| 苹果        | $1      |   6    |
+| 草莓        | $1      |   7    |
+
+作者：Gaolex
+链接：https://www.jianshu.com/p/abaff828100d
+來源：简书
+简书著作权归作者所有，任何形式的转载都请联系作者获得授权并注明出处。
+
 这里注意转义编码需要避免**重复转义**，在这里就是'%'要最先转。代码如下：
 ```python
 import pyperclip
