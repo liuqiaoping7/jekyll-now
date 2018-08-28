@@ -115,7 +115,7 @@ energy detection and are refined using cyclostationary estimators.
 显然文本中 '/' 和后面的内容都没有出现在Google翻译框中！这其实是url的规则把'/'当做解析字符处理了。解决这个问题需要**特殊字符转义编码** ：  
 
 |     原字符     |     转义编码     |
-|  ------ |    ------    |
+|      :------:      |        :------:       |
 |    \+    |    %2B    |
 |     ?     |    %3F     |
 |    %    |    %25    |
