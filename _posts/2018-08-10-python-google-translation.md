@@ -76,7 +76,7 @@ def altercopy():
 
 这里我们需要了解一下url的常识，不过我们暂且不深究。在浏览器上翻译hello看看就明白了。  
 
-直观的就是 https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/ + 'hello'。也就是访问[hello](https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/hello)  
+直观的就是 https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/ + 'hello'。也就是访问[https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/hello](https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/hello)。  
 
 ![image07](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img07.png)
 ```python
@@ -112,11 +112,13 @@ energy detection and are refined using cyclostationary estimators.
 ![image08](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img08.png)  
 
 明眼人一看就明白了翻译内容 '/' 和后面的内容都没有出现在Google翻译框中！这其实就是因为url的规则。多的不啰嗦，大家伙看看url编码就知道了。我们解决这个问题就需要**特殊字符转义编码** ：
-+ +    %2B
-+ ?    %3F
-+ %  %25
-+ #    %23
-+ &   %26  
+原字符 | 转义编码
+--- | ---
+\+ | %2B
+? | %3F
+% | %25
+\# | %23
+& | %26
 
 这里注意转义编码需要避免**重复转义**，在这里就是'%'需要先转，代码如下：
 ```python
