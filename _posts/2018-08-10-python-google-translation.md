@@ -21,7 +21,7 @@ title: Python应用-判断单词-合并换行-自动Google翻译文献
 ![image03](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img03.png)  
 
 ##    2.2 石器 #
-重复性的工作，机器是最胜任。最容易想到的办法：把文本复制到编辑器里，查找全局替换就好了。  
+重复性的工作，机器最胜任了。最容易想到的办法：把文本复制到编辑器里，查找全局替换就好了。  
 
 以atom编辑器为例：  
 
@@ -40,9 +40,9 @@ title: Python应用-判断单词-合并换行-自动Google翻译文献
 ##    2.3 铁器 #
 接来下文明大跃进，我们自己生产工具，这个工具就是--**Python脚本**，让他帮我们完成*替换*，步骤如下：  
 
-+ 我们从PDF按下Ctrl+C
-+ 工具替换粘贴板文本里的''\r\n'
-+ 我们粘贴到Google翻译  
++ 手动从PDF复制文本
++ 工具自动替换粘贴板文本的'\r\n'
++ 手动粘贴到Google翻译框  
 
 Python脚本定时监视粘贴板：
 ```python
@@ -64,21 +64,22 @@ def altercopy():
             pyperclip.copy(strBuff)    #修改粘贴板
             tempBuff=strBuff    #防止循环
 ```
-于是乎我们省心了不少，从PDF文献复制文本，等待一会粘贴到Google翻译框中，换行就是已经自动合并的了。  
+至此省心了些。只要从PDF文献复制文本，等待一会粘贴到Google翻译框中，粘贴出的已经自动合并换行了。  
 
 ##    2.4 蒸汽 #
-使用过林格斯词典大多体验过这个功能：选中内容后词典会自动弹出翻译结果来。我们要求不高，当我复制了内容之后是否可以为我们弹出Google翻译结果呢？  
+使用过林格斯词典大多体验过这个功能：选中内容后词典会自动弹出翻译结果。类似的我们可以实现，复制了文本之后自动弹出Google翻译结果。  
 
 模拟步骤如下：  
-+ 我们从PDF按下Ctrl+C
-+ 工具替换粘贴板文本里的\r\n
-+ 工具打开浏览器，访问Goolge翻译网页翻译粘贴板文本  
++ 手动从PDF复制文本
++ 工具自动替换粘贴板文本的'\r\n'
++ 工具自动打开浏览器，访问Goolge翻译网页，翻译粘贴板内的文本  
 
-这里我们需要了解一下url的常识，不过我们暂且不深究。在浏览器上翻译hello看看就明白了。  
-
-直观的就是 https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/ + 'hello'。也就是访问[https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/hello](https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/hello)。  
+这里我们需要了解url的常识，在Goolge翻译网页输入hello，可以看到如下url：  
 
 ![image07](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img07.png)
+
+直观地看就是 https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/ + 'hello'。也就是说访问[https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/hello](https://translate.google.com/?hl=zh-CN&tab=wT#en/zh-CN/hello)就可以把'hello'翻译'你好'。  
+
 ```python
 import pyperclip
 import time
@@ -100,7 +101,7 @@ def translation():
             webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(chrome_path))
             webbrowser.get('chrome').open(url)
 ```
-现在只要我们从PDF文献复制文本，就会自动打开Google翻译标签页，看起来一切正常。不过当我们复制下面这一段文本：
+现在只要从PDF文献复制文本，就会自动打开Google翻译标签页。看起来一切正常，不过当我们复制下面这一段文本：
 > In this work, we demonstrate a hierarchical
 classification tree that filters and classifies a received signal
 as AM, FM, 4/16/64-QAM, 2/4/8-PAM, 4/8/16-PSK, DSSS, and
@@ -111,7 +112,7 @@ energy detection and are refined using cyclostationary estimators.
 
 ![image08](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img08.png)  
 
-明显的文本中 '/' 和后面的内容都没有出现在Google翻译框中！这其实是url的规则把'/'当做解析字符处理了。解决这个问题就需要**特殊字符转义编码** ：
+显然文本中 '/' 和后面的内容都没有出现在Google翻译框中！这其实是url的规则把'/'当做解析字符处理了。解决这个问题需要**特殊字符转义编码** ：
 | 原字符 | 转义编码 |
 | --- | --- |
 | \+ | %2B |
@@ -120,7 +121,7 @@ energy detection and are refined using cyclostationary estimators.
 | \# | %23 |
 | & | %26 |
 
-这里注意转义编码需要避免**重复转义**，在这里就是'%'需要先转。代码如下：
+这里注意转义编码需要避免**重复转义**，在这里就是'%'要最先转。代码如下：
 ```python
 import pyperclip
 import time
@@ -149,7 +150,7 @@ def translation():
             webbrowser.get('chrome').open(url)
 ```
 ##    2.5 电气自动 #
-以上我们只是机械地把*换行*替换为*空格*，有时候不仅在词间换行，也会有断字换行的情况，这个时候正确的处理应该是把*换行*替换为*空字符*。这里关键在于判断是否断字，等价于判断单词是否有效。这里我们大材小用一下Natural language toolkit (NLTK)。
+以上我们只是机械地把*换行*替换为*空格*，有时候不仅有词间换行，也会有断字换行的情况，此时正确的处理应该是把*换行*替换为*空字符*。这里关键在于判断是否断字，等价于判断单词是否有效。这里我们大材小用一下 **Natural language toolkit (NLTK)** 。
 ```python
 import pyperclip
 import time
@@ -189,17 +190,17 @@ def translation():
             webbrowser.get('chrome').open(url)
 ```
 运行示例：
-选择Ctrl+C:  
+复制文本:  
 
 ![image09](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img09.png)  
 
-启动脚本和输出：  
+启动脚本：  
 
 ![image10](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img10.png)  
 
-自动打开网页翻译内容：  
+自动弹出的翻译网页：  
 
 ![image11](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img11.png)  
 
 #  3、感想 #
-Python对字符串等序列的操作极其简明；各方面应用支持库非常丰富。对于编程者构建实时性要求不高的日常辅助工具非常方便快捷。本例完整脚本代码可从[auto_google_translation](https://github.com/liuqiaoping7/auto_google_translation)fork或download。
+Python对字符串等序列的操作极其简明；各方面应用的支持库非常丰富。对于编程者构建实时性要求不高的日常辅助工具非常方便快捷。本例完整脚本代码可从[auto_google_translation](https://github.com/liuqiaoping7/auto_google_translation)fork或download。
