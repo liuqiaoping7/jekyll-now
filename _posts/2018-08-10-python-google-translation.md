@@ -14,14 +14,14 @@ title: Python应用-判断单词-合并换行-自动Google翻译文献
 
 ![image02](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img02.png)  
 
-#  2、循序渐进 #
+#  2、逐步改进 #
 ##    2.1 原始 #
-问题罪魁祸首是PDF论文复制出来的换行符号。这还不简单，逐个删除换行符号就行了？可以看到翻译结果明显准确了！可是重复的事情做多了，大概你也就烦了。  
+罪魁祸首是PDF论文的换行。手工逐个删除换行符，可以看到翻译结果明显准确了！只是重复的事情做多了也烦人！  
 
 ![image03](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img03.png)  
 
 ##    2.2 石器 #
-重复性的工作嘛，机器是最乐意的了。最容易想到的是：复制到一个文本编辑器里，查找全局替换就好了。  
+重复性的工作，机器是最胜任。最容易想到的办法：把文本复制到编辑器里，查找全局替换就好了。  
 
 以atom编辑器为例：  
 
@@ -64,7 +64,7 @@ def altercopy():
             pyperclip.copy(strBuff)    #修改粘贴板
             tempBuff=strBuff    #防止循环
 ```
-于是乎我们省心了不少。  
+于是乎我们省心了不少，从PDF文献复制文本，等待一会粘贴到Google翻译框中，换行就是已经自动合并的了。  
 
 ##    2.4 蒸汽 #
 使用过林格斯词典大多体验过这个功能：选中内容后词典会自动弹出翻译结果来。我们要求不高，当我复制了内容之后是否可以为我们弹出Google翻译结果呢？  
@@ -100,7 +100,7 @@ def translation():
             webbrowser.register('chrome', None,webbrowser.BackgroundBrowser(chrome_path))
             webbrowser.get('chrome').open(url)
 ```
-咋一试，真的是省心哈！都说出来混迟早要还呢。当复制下面一段：
+现在只要我们从PDF文献复制文本，就会自动打开Google翻译标签页，看起来一切正常。不过当我们复制下面这一段文本：
 > In this work, we demonstrate a hierarchical
 classification tree that filters and classifies a received signal
 as AM, FM, 4/16/64-QAM, 2/4/8-PAM, 4/8/16-PSK, DSSS, and
@@ -111,7 +111,7 @@ energy detection and are refined using cyclostationary estimators.
 
 ![image08](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img08.png)  
 
-明眼人一看就明白了翻译内容 '/' 和后面的内容都没有出现在Google翻译框中！这其实就是因为url的规则。多的不啰嗦，大家伙看看url编码就知道了。我们解决这个问题就需要**特殊字符转义编码** ：
+明显的文本中 '/' 和后面的内容都没有出现在Google翻译框中！这其实是url的规则把'/'当做解析字符处理了。解决这个问题就需要**特殊字符转义编码** ：
 原字符 | 转义编码
 --- | ---
 \+ | %2B
@@ -120,7 +120,7 @@ energy detection and are refined using cyclostationary estimators.
 \# | %23
 & | %26
 
-这里注意转义编码需要避免**重复转义**，在这里就是'%'需要先转，代码如下：
+这里注意转义编码需要避免**重复转义**，在这里就是'%'需要先转。代码如下：
 ```python
 import pyperclip
 import time
@@ -138,7 +138,7 @@ def translation():
             strBuff = strBuff.replace('\r\n', ' ')
 
             strBuff = strBuff.replace('%', '%25')    #url转义 %一定要在最前面
-            strBuff = strBuff.replace('+ ', ' %2B')
+            strBuff = strBuff.replace('+ ', '%2B')
             strBuff = strBuff.replace('/', '%2F')
             strBuff = strBuff.replace('?', '%3F')
             strBuff = strBuff.replace('#', '%23')
@@ -149,7 +149,7 @@ def translation():
             webbrowser.get('chrome').open(url)
 ```
 ##    2.5 电气自动 #
-以上我们只是机械地把*换行*替换为*空格*，有时候不仅在词间换行，也会有断字换行的情况，这个时候正确的处理应该是把*换行*替换为*空字符*。这里最核心的需求是判断是否断字，等价于判断单词是否有效。这里我们大材小用一下Natural language toolkit (NLTK)。
+以上我们只是机械地把*换行*替换为*空格*，有时候不仅在词间换行，也会有断字换行的情况，这个时候正确的处理应该是把*换行*替换为*空字符*。这里关键在于判断是否断字，等价于判断单词是否有效。这里我们大材小用一下Natural language toolkit (NLTK)。
 ```python
 import pyperclip
 import time
@@ -178,7 +178,7 @@ def translation():
                     strBuff =  strBuff.replace('\r\n', '',1)    #断词换行
 
             strBuff = strBuff.replace('%', '%25')    #url转义 %一定要在最前面
-            strBuff = strBuff.replace('+ ', ' %2B')
+            strBuff = strBuff.replace('+ ', '%2B')
             strBuff = strBuff.replace('/', '%2F')
             strBuff = strBuff.replace('?', '%3F')
             strBuff = strBuff.replace('#', '%23')
@@ -202,4 +202,4 @@ def translation():
 ![image11](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img11.png)  
 
 #  3、感想 #
-Python这门工具语言，对于字符串等序列操作极其简明，各方面支持库也非常丰富。日常数据处理极其便利，对于不同场景需求应该多加应用！本例完整脚本代码可从[auto_google_translation](https://github.com/liuqiaoping7/auto_google_translation)fork或者download。
+Python对字符串等序列的操作极其简明；各方面应用支持库非常丰富。对于编程者构建实时性要求不高的日常辅助工具非常方便快捷。本例完整脚本代码可从[auto_google_translation](https://github.com/liuqiaoping7/auto_google_translation)fork或download。
