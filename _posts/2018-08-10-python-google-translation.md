@@ -151,11 +151,12 @@ def translation():
             webbrowser.get('chrome').open(url)
 ```
 ##    2.5 电气自动化时代 #
-以上我们只是机械地把*换行*替换为*空格*，有时候不仅有词间换行，也会有断字换行的情况，此时正确的处理应该是把*换行*替换为*空字符*。这里关键在于判断是否断字，等价于判断单词是否有效。这里我们大材小用一下 **Natural language toolkit (NLTK)** 。
+以上我们只是机械地把*换行*替换为*空格*，有时候不仅有词间换行，也会有断字换行的情况，此时正确的处理应该是把*换行*替换为*空字符*。这里关键在于判断是否断字，等价于判断单词是否有效。这里我们大材小用一下 **Natural language toolkit (NLTK)** ，首次运行需要执行 nltk.download() ，在弹出的下载框中选择 package --> words -->download 。注意判断单词还需要兼顾单词 **复数后缀** "s"、"es" 。
 ```python
 import pyperclip
 import time
 import nltk
+#nltk.download()    #首次运行需要开启并下载选择 package --> words -->download
 from nltk.corpus import words as words_range
 
 def translation():
