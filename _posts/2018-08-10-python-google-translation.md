@@ -203,6 +203,7 @@ def translation():
 自动弹出的翻译网页：  
 
 ![image11](https://raw.githubusercontent.com/liuqiaoping7/liuqiaoping7.github.io/master/images/img11.png)  
+复制新的想要翻译的段落，引发粘贴板内容发生变化，就会弹出新的Google翻译标签页。
 
 #  3、感想 #
 Python对字符串等序列的操作极其简明；各方面应用的支持库非常丰富。对于编程者构建实时性要求不高的日常辅助工具非常方便。
